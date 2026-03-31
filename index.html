@@ -17,44 +17,13 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .stat-lbl { font-size: 11px; color: #5a5f7a; margin-top: 2px; }
 .card { background: #161924; border: 1px solid #252840; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
 .card-title { font-size: 11px; font-weight: 600; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-
-/* Quagga renders its own video+canvas inside this div */
-#scanner-container {
-  position: relative;
-  width: 100%;
-  background: #000;
-  border-radius: 10px;
-  overflow: hidden;
-  aspect-ratio: 4/3;
-}
-#scanner-container video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block;
-}
-#scanner-container canvas {
-  position: absolute !important;
-  top: 0 !important; left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-.scan-overlay {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  pointer-events: none; z-index: 10;
-}
-.scan-box {
-  width: 85%; height: 35%;
-  border: 2px solid rgba(59,76,202,0.9);
-  border-radius: 8px; position: relative;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-}
-.scan-line {
-  position: absolute; left: 4px; right: 4px; height: 2px;
-  background: linear-gradient(90deg, transparent, #3b4cca, #60a5fa, #3b4cca, transparent);
-  animation: scan 1.5s ease-in-out infinite; top: 10%;
-}
+.video-wrap { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
+#scanner-container video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
+#scanner-container canvas { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; }
+#scanner-container { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
+.scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+.scan-box { width: 85%; height: 35%; border: 2px solid rgba(59,76,202,0.9); border-radius: 8px; position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
+.scan-line { position: absolute; left: 4px; right: 4px; height: 2px; background: linear-gradient(90deg, transparent, #3b4cca, #60a5fa, #3b4cca, transparent); animation: scan 1.5s ease-in-out infinite; top: 10%; }
 @keyframes scan { 0%,100%{top:10%} 50%{top:85%} }
 .corner { position: absolute; width: 14px; height: 14px; border-color: #60a5fa; border-style: solid; }
 .corner.tl { top:-2px; left:-2px; border-width: 3px 0 0 3px; }
@@ -62,24 +31,47 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .corner.bl { bottom:-2px; left:-2px; border-width: 0 0 3px 3px; }
 .corner.br { bottom:-2px; right:-2px; border-width: 0 3px 3px 0; }
 .hint-txt { position: absolute; bottom: 8px; width: 100%; text-align: center; font-size: 11px; color: rgba(255,255,255,0.45); pointer-events: none; z-index: 11; }
-
 .status { background: #1a1e30; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #5a5f7a; text-align: center; margin-top: 10px; min-height: 34px; display: flex; align-items: center; justify-content: center; }
 .status.ok { color: #4ade80; background: #0f2d1a; }
 .status.err { color: #f87171; background: #2d1a1a; }
 .status.loading { color: #60a5fa; background: #0f1a2d; }
-
+.status.paused { color: #fbbf24; background: #2d250f; }
 .btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .btn { flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid #2a2f47; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-start { background: #3b4cca; border-color: #4a5ce0; color: #fff; }
 .btn-start:not(:disabled):hover { background: #4a5ce0; }
 .btn-stop { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
-
 .manual-row { display: flex; gap: 8px; margin-top: 12px; }
 .manual-row input { flex: 1; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; padding: 10px 12px; color: #e8eaf0; font-size: 14px; outline: none; }
 .manual-row input::placeholder { color: #4a4f6a; }
 .manual-row input:focus { border-color: #3b4cca; }
-.btn-add { flex: 0; padding: 10px 16px; background: #1e2235; color: #c8cce8; font-size: 14px; }
+.btn-add { flex: 0; padding: 10px 16px; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; color: #c8cce8; font-size: 14px; cursor: pointer; }
+
+/* Confirmation modal */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-bg.show { opacity: 1; pointer-events: all; }
+.modal {
+  background: #161924; border: 1px solid #252840;
+  border-radius: 16px; padding: 24px; width: 100%; max-width: 360px;
+  transform: scale(0.95); transition: transform .2s;
+}
+.modal-bg.show .modal { transform: scale(1); }
+.modal-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+.modal-label { font-size: 11px; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; text-align: center; margin-bottom: 6px; }
+.modal-code { font-family: monospace; font-size: 22px; font-weight: 700; color: #4ade80; text-align: center; margin-bottom: 4px; word-break: break-all; }
+.modal-format { font-size: 12px; color: #2a7a40; text-align: center; margin-bottom: 20px; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btn { flex: 1; padding: 13px; border-radius: 10px; border: 1px solid; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; transition: all .15s; }
+.modal-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
+.modal-btn-ok:hover { background: #1a3d25; }
+.modal-btn-retry { background: #2d250f; border-color: #5a4a20; color: #fbbf24; }
+.modal-btn-retry:hover { background: #3d350f; }
 
 .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .filters { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -90,7 +82,6 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .btn-clear { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
 .btn-export { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .btn-export:hover { background: #1a3d25; }
-
 .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #252840; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead tr { background: #1a1e30; }
@@ -144,7 +135,7 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
   <div class="manual-row">
     <input id="manual-inp" type="text" placeholder="Código manual..." onkeydown="if(event.key==='Enter')addManual()">
-    <button class="btn btn-add" onclick="addManual()">+ Añadir</button>
+    <button class="btn-add" onclick="addManual()">+ Añadir</button>
   </div>
 </div>
 
@@ -172,15 +163,28 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
+<!-- Confirmation modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-icon">🔍</div>
+    <div class="modal-label">Código detectado</div>
+    <div class="modal-code" id="modal-code">—</div>
+    <div class="modal-format" id="modal-format">—</div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-retry" onclick="retryScanning()">↺ Repetir</button>
+      <button class="modal-btn modal-btn-ok" onclick="confirmScan()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-let records = JSON.parse(localStorage.getItem('scan_q2') || '[]');
+let records = JSON.parse(localStorage.getItem('scan_q3') || '[]');
 let filterType = 'all';
-let lastCode = '', lastTime = 0;
 let quaggaRunning = false;
-
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+let pendingCode = null;
+let pendingType = null;
 
 function startScan() {
   document.getElementById('btn-start').disabled = true;
@@ -196,78 +200,97 @@ function startScan() {
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 480, ideal: 720, max: 1080 },
       },
-      area: {
-        top: '20%', right: '5%',
-        left: '5%', bottom: '20%',
-      },
+      area: { top: '25%', right: '5%', left: '5%', bottom: '25%' },
     },
-    locator: {
-      patchSize: 'medium',
-      halfSample: false,
-    },
-    numOfWorkers: 0, // required for iOS
+    locator: { patchSize: 'medium', halfSample: false },
+    numOfWorkers: 0,
     frequency: 10,
     decoder: {
       readers: [
-        'ean_reader',
-        'ean_8_reader',
-        'code_128_reader',
-        'code_39_reader',
-        'upc_reader',
-        'upc_e_reader',
-        'codabar_reader',
-        'i2of5_reader',
+        'ean_reader', 'ean_8_reader', 'code_128_reader',
+        'code_39_reader', 'upc_reader', 'upc_e_reader',
+        'codabar_reader', 'i2of5_reader',
       ],
-      debug: {
-        drawBoundingBox: false,
-        showFrequency: false,
-        drawScanline: false,
-        showPattern: false,
-      },
       multiple: false,
     },
     locate: true,
   }, function(err) {
     if (err) {
       setStatus('Error: ' + err.message, 'err');
-      toast('Error iniciando escáner: ' + err.message, 'err');
       document.getElementById('btn-start').disabled = false;
       return;
     }
     Quagga.start();
     quaggaRunning = true;
     document.getElementById('btn-stop').disabled = false;
-    setStatus('✓ Apunta el código de barras al recuadro', 'ok');
+    setStatus('✓ Apunta el código al recuadro', 'ok');
   });
 
-  // Result handler — only accept high confidence results
   Quagga.onDetected(function(result) {
     if (!result || !result.codeResult) return;
+    if (pendingCode) return; // already showing confirmation
 
     const code = result.codeResult.code;
     const format = result.codeResult.format;
 
-    // Filter low confidence reads
+    // Filter low confidence
     const errors = result.codeResult.decodedCodes
       .filter(c => c.error !== undefined)
       .map(c => c.error);
     const avgError = errors.length ? errors.reduce((a,b) => a+b, 0) / errors.length : 1;
+    if (avgError > 0.25) return;
 
-    if (avgError > 0.25) return; // too many errors, skip
+    // Pause and show confirmation
+    Quagga.pause();
+    pendingCode = code;
+    pendingType = format === 'qr_code' ? 'QR' : 'Barcode (' + format + ')';
 
-    const isQR = format === 'qr_code';
-    addRecord(code, isQR ? 'QR' : 'Barcode (' + format + ')');
+    beep();
+    showModal(code, pendingType);
+    setStatus('⏸ Código detectado — confirma o repite', 'paused');
   });
 }
 
 function stopScan() {
-  if (quaggaRunning) {
-    Quagga.stop();
-    quaggaRunning = false;
-  }
+  if (quaggaRunning) { Quagga.stop(); quaggaRunning = false; }
+  pendingCode = null;
+  hideModal();
   document.getElementById('btn-start').disabled = false;
   document.getElementById('btn-stop').disabled = true;
   setStatus('Escáner detenido', '');
+}
+
+function confirmScan() {
+  if (!pendingCode) return;
+  addRecord(pendingCode, pendingType);
+  pendingCode = null;
+  pendingType = null;
+  hideModal();
+  // Resume scanning for next code
+  if (quaggaRunning) {
+    Quagga.start();
+    setStatus('✓ Guardado — apunta al siguiente código', 'ok');
+  }
+}
+
+function retryScanning() {
+  pendingCode = null;
+  pendingType = null;
+  hideModal();
+  if (quaggaRunning) {
+    Quagga.start();
+    setStatus('✓ Apunta el código al recuadro', 'ok');
+  }
+}
+
+function showModal(code, type) {
+  document.getElementById('modal-code').textContent = code;
+  document.getElementById('modal-format').textContent = type;
+  document.getElementById('modal').classList.add('show');
+}
+
+function hideModal() {
+  document.getElementById('modal').classList.remove('show');
 }
 
 function setStatus(msg, type) {
@@ -276,11 +299,7 @@ function setStatus(msg, type) {
   el.className = 'status' + (type ? ' ' + type : '');
 }
 
-function addRecord(code, type) {
-  const now = Date.now();
-  if (code === lastCode && now - lastTime < 2500) return;
-  lastCode = code; lastTime = now;
-
+function beep() {
   try {
     const ac = new (window.AudioContext || window.webkitAudioContext)();
     const o = ac.createOscillator(), g = ac.createGain();
@@ -290,7 +309,9 @@ function addRecord(code, type) {
     g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.1);
     o.start(); o.stop(ac.currentTime + 0.1);
   } catch(e) {}
+}
 
+function addRecord(code, type) {
   const rec = {
     id: records.length ? Math.max(...records.map(r => r.id)) + 1 : 1,
     code, type,
@@ -299,7 +320,7 @@ function addRecord(code, type) {
   };
   records.unshift(rec);
   save(); updateStats(); renderTable();
-  toast('✓ ' + code, 'ok');
+  toast('✓ Guardado: ' + code, 'ok');
 }
 
 function addManual() {
@@ -313,7 +334,7 @@ function addManual() {
 function deleteRec(id) { records = records.filter(r => r.id !== id); save(); updateStats(); renderTable(); }
 function updateNote(id, val) { const r = records.find(r => r.id === id); if (r) { r.note = val; save(); } }
 function clearAll() { if (!records.length) return; if (!confirm('¿Eliminar todos?')) return; records = []; save(); updateStats(); renderTable(); }
-function save() { localStorage.setItem('scan_q2', JSON.stringify(records)); }
+function save() { localStorage.setItem('scan_q3', JSON.stringify(records)); }
 
 function updateStats() {
   document.getElementById('s-total').textContent = records.length;
@@ -324,8 +345,7 @@ function updateStats() {
 function setFilter(type, btn) {
   filterType = type;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTable();
+  btn.classList.add('active'); renderTable();
 }
 
 function renderTable() {
