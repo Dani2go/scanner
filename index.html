@@ -3,24 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lector de Códigos</title>
+<title>Scanner Almacén</title>
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.9.0/lib/jsrsasign-all-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e8eaf0; padding: 16px; max-width: 700px; margin: 0 auto; }
 h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .sub { font-size: 13px; color: #8b8fa8; text-align: center; margin-bottom: 16px; }
+
+/* Location banner */
+.location-banner {
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+  background: #1a1e30; border: 1px solid #252840;
+  transition: all .3s;
+}
+.location-banner.active { background: #0f2d1a; border-color: #1a5a30; }
+.location-icon { font-size: 28px; }
+.location-info { flex: 1; }
+.location-label { font-size: 11px; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.6px; }
+.location-name { font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 2px; }
+.location-name.empty { color: #3a3f5a; font-size: 14px; font-weight: 400; }
+.location-count { font-size: 11px; color: #2a7a40; margin-top: 2px; }
+
 .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .stat { background: #1e2235; border-radius: 10px; padding: 12px; text-align: center; }
 .stat-val { font-size: 24px; font-weight: 700; }
 .stat-lbl { font-size: 11px; color: #5a5f7a; margin-top: 2px; }
+
 .card { background: #161924; border: 1px solid #252840; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
 .card-title { font-size: 11px; font-weight: 600; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-.video-wrap { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
+
+#scanner-container { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
 #scanner-container video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
 #scanner-container canvas { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; }
-#scanner-container { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
 .scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
 .scan-box { width: 85%; height: 35%; border: 2px solid rgba(59,76,202,0.9); border-radius: 8px; position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
 .scan-line { position: absolute; left: 4px; right: 4px; height: 2px; background: linear-gradient(90deg, transparent, #3b4cca, #60a5fa, #3b4cca, transparent); animation: scan 1.5s ease-in-out infinite; top: 10%; }
@@ -36,12 +54,14 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .status.err { color: #f87171; background: #2d1a1a; }
 .status.loading { color: #60a5fa; background: #0f1a2d; }
 .status.paused { color: #fbbf24; background: #2d250f; }
+
 .btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .btn { flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid #2a2f47; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-start { background: #3b4cca; border-color: #4a5ce0; color: #fff; }
 .btn-start:not(:disabled):hover { background: #4a5ce0; }
 .btn-stop { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
+
 .manual-row { display: flex; gap: 8px; margin-top: 12px; }
 .manual-row input { flex: 1; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; padding: 10px 12px; color: #e8eaf0; font-size: 14px; outline: none; }
 .manual-row input::placeholder { color: #4a4f6a; }
@@ -49,23 +69,19 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .btn-add { flex: 0; padding: 10px 16px; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; color: #c8cce8; font-size: 14px; cursor: pointer; }
 
 /* Confirmation modal */
-.modal-bg {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100; padding: 20px;
-  opacity: 0; pointer-events: none; transition: opacity .2s;
-}
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .modal-bg.show { opacity: 1; pointer-events: all; }
-.modal {
-  background: #161924; border: 1px solid #252840;
-  border-radius: 16px; padding: 24px; width: 100%; max-width: 360px;
-  transform: scale(0.95); transition: transform .2s;
-}
+.modal { background: #161924; border: 1px solid #252840; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; transform: scale(0.95); transition: transform .2s; }
 .modal-bg.show .modal { transform: scale(1); }
-.modal-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+.modal-icon { font-size: 36px; text-align: center; margin-bottom: 10px; }
+.modal-tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 auto 8px; display: block; width: fit-content; }
+.modal-tag.qr { background: #1a2d4a; color: #60a5fa; }
+.modal-tag.ean { background: #1a2d1a; color: #4ade80; }
 .modal-label { font-size: 11px; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; text-align: center; margin-bottom: 6px; }
-.modal-code { font-family: monospace; font-size: 22px; font-weight: 700; color: #4ade80; text-align: center; margin-bottom: 4px; word-break: break-all; }
-.modal-format { font-size: 12px; color: #2a7a40; text-align: center; margin-bottom: 20px; }
+.modal-code { font-family: monospace; font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; word-break: break-all; }
+.modal-code.qr-code { color: #60a5fa; }
+.modal-code.ean-code { color: #4ade80; }
+.modal-sublabel { font-size: 12px; color: #5a5f7a; text-align: center; margin-bottom: 20px; }
 .modal-btns { display: flex; gap: 10px; }
 .modal-btn { flex: 1; padding: 13px; border-radius: 10px; border: 1px solid; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; transition: all .15s; }
 .modal-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
@@ -73,15 +89,21 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .modal-btn-retry { background: #2d250f; border-color: #5a4a20; color: #fbbf24; }
 .modal-btn-retry:hover { background: #3d350f; }
 
+/* Sync indicator */
+.sync-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 14px; background: #1a1e30; border: 1px solid #252840; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #3a3f5a; flex-shrink: 0; }
+.sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
+.sync-dot.synced { background: #4ade80; }
+.sync-dot.error { background: #f87171; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
 .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.filters { display: flex; gap: 6px; flex-wrap: wrap; }
-.filter-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid #2a2f47; background: transparent; color: #8b8fa8; font-size: 12px; cursor: pointer; }
-.filter-btn.active { background: #3b4cca; border-color: #3b4cca; color: #fff; }
 .actions { display: flex; gap: 6px; }
 .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 7px; border: 1px solid; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
 .btn-clear { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
 .btn-export { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .btn-export:hover { background: #1a3d25; }
+
 .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #252840; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead tr { background: #1a1e30; }
@@ -90,32 +112,51 @@ tbody tr { border-bottom: 1px solid #1a1e30; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #1a1e30; }
 td { padding: 9px 12px; color: #c8cce8; }
-.code-td { font-family: monospace; font-size: 12px; color: #7dd3fc; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.code-td { font-family: monospace; font-size: 12px; color: #7dd3fc; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.loc-td { font-size: 12px; color: #4ade80; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-.b-qr { background: #1a2d4a; color: #60a5fa; }
-.b-bar { background: #1a2d1a; color: #4ade80; }
+.b-ean { background: #1a2d1a; color: #4ade80; }
 .b-man { background: #2d2a1a; color: #fbbf24; }
-.note-inp { width: 100%; background: #0f1117; border: 1px solid #2a2f47; border-radius: 5px; padding: 3px 7px; color: #e8eaf0; font-size: 12px; outline: none; }
 .del-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; color: #3a3f5a; font-size: 14px; }
 .del-btn:hover { color: #f87171; }
 .empty { text-align: center; padding: 36px 20px; color: #3a3f5a; font-size: 13px; }
+
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); padding: 10px 20px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all .25s; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.ok { background: #0f2d1a; border: 1px solid #1a5a30; color: #4ade80; }
 .toast.err { background: #2d1a1a; border: 1px solid #5a2020; color: #f87171; }
+.toast.info { background: #0f1a2d; border: 1px solid #1a3a6a; color: #60a5fa; }
 </style>
 </head>
 <body>
 
-<h1>📦 Lector de Códigos</h1>
-<p class="sub">EAN-13 · QR · Barcode · Excel</p>
+<h1>📦 Scanner Almacén</h1>
+<p class="sub">Escanea ubicación QR → luego EAN-13</p>
 
-<div class="stats">
-  <div class="stat"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total</div></div>
-  <div class="stat"><div class="stat-val" style="color:#60a5fa" id="s-qr">0</div><div class="stat-lbl">QR</div></div>
-  <div class="stat"><div class="stat-val" style="color:#4ade80" id="s-bar">0</div><div class="stat-lbl">Barcode</div></div>
+<!-- Sync status -->
+<div class="sync-bar">
+  <div class="sync-dot" id="sync-dot"></div>
+  <span id="sync-text">Sin sincronizar</span>
 </div>
 
+<!-- Current location -->
+<div class="location-banner" id="location-banner">
+  <div class="location-icon">📍</div>
+  <div class="location-info">
+    <div class="location-label">Ubicación activa</div>
+    <div class="location-name empty" id="location-name">Escanea un QR para establecer ubicación</div>
+    <div class="location-count" id="location-count"></div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total EAN</div></div>
+  <div class="stat"><div class="stat-val" id="s-locs" style="color:#60a5fa">0</div><div class="stat-lbl">Ubicaciones</div></div>
+  <div class="stat"><div class="stat-val" id="s-pending" style="color:#fbbf24">0</div><div class="stat-lbl">Sin sync</div></div>
+</div>
+
+<!-- Scanner -->
 <div class="card">
   <div class="card-title">Escáner</div>
   <div id="scanner-container">
@@ -126,7 +167,7 @@ td { padding: 9px 12px; color: #c8cce8; }
         <div class="corner bl"></div><div class="corner br"></div>
       </div>
     </div>
-    <div class="hint-txt">Centra el código de barras en el recuadro</div>
+    <div class="hint-txt" id="scan-hint">QR = ubicación · EAN-13 = producto</div>
   </div>
   <div class="status" id="status">Pulsa Iniciar para activar la cámara</div>
   <div class="btn-row">
@@ -134,19 +175,15 @@ td { padding: 9px 12px; color: #c8cce8; }
     <button class="btn btn-stop" id="btn-stop" onclick="stopScan()" disabled>■ Detener</button>
   </div>
   <div class="manual-row">
-    <input id="manual-inp" type="text" placeholder="Código manual..." onkeydown="if(event.key==='Enter')addManual()">
+    <input id="manual-inp" type="text" placeholder="EAN manual..." onkeydown="if(event.key==='Enter')addManual()">
     <button class="btn-add" onclick="addManual()">+ Añadir</button>
   </div>
 </div>
 
+<!-- Records -->
 <div class="card">
   <div class="toolbar">
-    <div class="filters">
-      <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
-      <button class="filter-btn" onclick="setFilter('QR',this)">QR</button>
-      <button class="filter-btn" onclick="setFilter('Barcode',this)">Barcode</button>
-      <button class="filter-btn" onclick="setFilter('Manual',this)">Manual</button>
-    </div>
+    <div class="card-title" style="margin-bottom:0">Registros</div>
     <div class="actions">
       <button class="btn-sm btn-clear" onclick="clearAll()">✕ Limpiar</button>
       <button class="btn-sm btn-export" onclick="exportXLS()">↓ Excel</button>
@@ -155,24 +192,25 @@ td { padding: 9px 12px; color: #c8cce8; }
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>#</th><th>Código</th><th>Tipo</th><th>Fecha/Hora</th><th>Nota</th><th></th>
+        <th>#</th><th>Ubicación</th><th>EAN</th><th>Tipo</th><th>Fecha/Hora</th><th></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
-    <div class="empty" id="empty">Sin registros — escanea o introduce un código</div>
+    <div class="empty" id="empty">Sin registros aún</div>
   </div>
 </div>
 
 <!-- Confirmation modal -->
 <div class="modal-bg" id="modal">
   <div class="modal">
-    <div class="modal-icon">🔍</div>
-    <div class="modal-label">Código detectado</div>
+    <div class="modal-icon" id="modal-icon">🔍</div>
+    <div class="modal-tag" id="modal-tag">EAN-13</div>
+    <div class="modal-label" id="modal-label">Código detectado</div>
     <div class="modal-code" id="modal-code">—</div>
-    <div class="modal-format" id="modal-format">—</div>
+    <div class="modal-sublabel" id="modal-sublabel"></div>
     <div class="modal-btns">
       <button class="modal-btn modal-btn-retry" onclick="retryScanning()">↺ Repetir</button>
-      <button class="modal-btn modal-btn-ok" onclick="confirmScan()">✓ Guardar</button>
+      <button class="modal-btn modal-btn-ok" id="modal-ok-btn" onclick="confirmScan()">✓ Guardar</button>
     </div>
   </div>
 </div>
@@ -180,20 +218,149 @@ td { padding: 9px 12px; color: #c8cce8; }
 <div class="toast" id="toast"></div>
 
 <script>
-let records = JSON.parse(localStorage.getItem('scan_q3') || '[]');
-let filterType = 'all';
+// ---- CONFIG ----
+const SHEET_ID = '12_EcOkWyq_ecKT4zgIQl22SC3OiSsOcg9eN5ECzkgp4';
+const SERVICE_ACCOUNT_EMAIL = 'scanner-app@scanner-almacen.iam.gserviceaccount.com';
+const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDKB9FCdfKsX/wW
+x3YuuiPj5pGG99eIEED+v3TrusOy3aXWrhIhV4g9lnm4BpystTBNsB0Uf9cL5QGK
+IW7gtIwc2Hdki3yOBmplBxL9AbJGxrsCzV6A8B0UBpIUvEfmcaSBNgYtExG0vP3Q
+2X3AJQxJM7Z9fKRofaT5STQ1qRpfPy1+kdw9MQlvSwpa0qPrr1EI0iXkoyc85BOn
+A1rQ4fRQVX9oOLq26UOdkGwhDvbcs2ZkdunnCo3DEKRs8VjFqyz1+up/l54a/kUn
+oBn0XKd6ayoI+aJwsjthb/KYbKdLs/cJjU+ssguQoAspVksuOz/a+ZkI3KK0Hc+b
+6YX5QSJBAgMBAAECggEACfHckSLxMR8Ab7ad0KsE/UDqRPSKPX5fVKrj/H6TB4j1
+kt26sr12TWHM2AwrRi0dFZXnuIyab1F0g/IlXRZGF11ocyCSnwMd1Z9FhgLBXc6G
+ghrN3hbzt3qjUjX6bBOH/3xDTZC0vGrZK6CpGf443pmXEBJEnYghyMubsFCEpc+F
+1LHFMxCPUvm7BhCTRdJDnQcjyTuB7Ij0PcBvLb8HKQHldBsglXCSLZAw377QgI7m
+nYyC6aq5745tJFMeiIMQL4DaIUlw7p2EaIbvUzRCiNgaE+rMBBs8tWix7iOG4Mgv
+WqiR7A9piA1poe6wKXpTpTph5k8CYmhjagTMmsrOAQKBgQD6xEQOX//yXCzZ8Gbh
+NeTs4qaJMRRcq1jDLWlKQn/9KK9NbB1KV9JiVWnffI23AtNF8V5xMD+GGOBt+mFn
+GpLBm3H4x6AqS7MAED4XPju8+nS5TnstC7ak4m7RRN9Xo3odJj1lbrqrSjv5V5Sq
+kiaDpn6Ud0H811I8O7U43SJukQKBgQDOPy0eQ5RA2jdD9A4D6J1cvvLjTEsWvwZA
+3Ykq40bBCCQEHgZvNylSHUT8sn8CAPc0kfRoWkskDTHnMP5/RHEVSaEY6LmJtRI2
+K0YW20y9p+g98It6ZsmwJ+twdOydjzldO7hM6PNIMYZgRjlyQMifrCViJzIpUi39
+hVNb5v+wsQKBgDB33NuWbIbwj+6zy36+BvhOOngL126t46Md1Nr4jXpl8bQaMHMd
+FFnTPnpmvZFg52r+Yw2nkK+fgUlgepEODs2C+P1nwCpMpVVezlF5wtwc4JCsfZxQ
+RkYKSfcCw9RRkZmuuXEwfL38xCjGZ8KsKuuJM7AIeOWgzJE9zSIng68xAoGAAVWX
+TSLSyriesunZTV0r53W0zJOpyLPjrnfAc26U/pq24O/wyrdopQdbcucUu0aWUti+
+5A3xfoI3WG+QtfITaTfYuviGesWZIJCXG36/uFplvkDYJiqUE3eupkObZEmQ7XF9
+d8HqEQWBAQ5zQLH6mk3a0A/A21OUyJccOvP7o4ECgYB+h3a+vn+fsc9pvumD/Qp3
+Xj32ClCrfHL1Mmf3LhG+jm1Z70UpY8vBnUCFs89kOe+Cmeq8jDBt2N9vVcimrZ/G
+qCis/+lPDrzJDp+sH+pPig1kvoACgWTFGqzM/K7B5jOsl4EQfMQgHlXiGnJWjPPY
+aRoQr17mhUT+WLZ6UKxk0w==
+-----END PRIVATE KEY-----`;
+
+// ---- State ----
+let records = JSON.parse(localStorage.getItem('almacen_v1') || '[]');
+let currentLocation = localStorage.getItem('almacen_location') || '';
 let quaggaRunning = false;
 let pendingCode = null;
-let pendingType = null;
+let pendingIsQR = false;
+let accessToken = null;
+let tokenExpiry = 0;
+let pendingSync = 0;
 
+// ---- Google Auth (JWT) ----
+async function getAccessToken() {
+  if (accessToken && Date.now() < tokenExpiry - 60000) return accessToken;
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const claim = {
+      iss: SERVICE_ACCOUNT_EMAIL,
+      scope: 'https://www.googleapis.com/auth/spreadsheets',
+      aud: 'https://oauth2.googleapis.com/token',
+      exp: now + 3600,
+      iat: now,
+    };
+    const jwt = KJUR.jws.JWS.sign('RS256', JSON.stringify(header), JSON.stringify(claim), PRIVATE_KEY);
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      accessToken = data.access_token;
+      tokenExpiry = Date.now() + (data.expires_in * 1000);
+      return accessToken;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function initSheet() {
+  try {
+    const token = await getAccessToken();
+    if (!token) { setSyncStatus('error', 'Sin conexión a Google'); return; }
+    // Check if header row exists
+    const res = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E1`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await res.json();
+    if (!data.values || !data.values[0]) {
+      // Add header row
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E1?valueInputOption=RAW`,
+        {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [['Ubicación', 'EAN', 'Tipo', 'Fecha/Hora', 'Nota']] }),
+        }
+      );
+    }
+    setSyncStatus('synced', 'Conectado a Google Sheets');
+  } catch(e) {
+    setSyncStatus('error', 'Error al conectar');
+  }
+}
+
+async function appendToSheet(rec) {
+  try {
+    setSyncStatus('syncing', 'Guardando...');
+    const token = await getAccessToken();
+    if (!token) { pendingSync++; updateStats(); setSyncStatus('error', 'Sin token'); return; }
+    const res = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: [[rec.location, rec.code, rec.type, rec.date, rec.note || '']] }),
+      }
+    );
+    if (res.ok) {
+      rec.synced = true;
+      save();
+      pendingSync = records.filter(r => !r.synced).length;
+      updateStats();
+      setSyncStatus('synced', 'Sincronizado ✓');
+    } else {
+      pendingSync++; updateStats();
+      setSyncStatus('error', 'Error al guardar');
+    }
+  } catch(e) {
+    pendingSync = records.filter(r => !r.synced).length;
+    updateStats();
+    setSyncStatus('error', 'Sin conexión');
+  }
+}
+
+function setSyncStatus(state, msg) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  dot.className = 'sync-dot ' + state;
+  txt.textContent = msg;
+}
+
+// ---- Scanner ----
 function startScan() {
   document.getElementById('btn-start').disabled = true;
   setStatus('Iniciando escáner...', 'loading');
 
   Quagga.init({
     inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
+      name: 'Live', type: 'LiveStream',
       target: document.getElementById('scanner-container'),
       constraints: {
         facingMode: 'environment',
@@ -206,11 +373,7 @@ function startScan() {
     numOfWorkers: 0,
     frequency: 10,
     decoder: {
-      readers: [
-        'ean_reader', 'ean_8_reader', 'code_128_reader',
-        'code_39_reader', 'upc_reader', 'upc_e_reader',
-        'codabar_reader', 'i2of5_reader',
-      ],
+      readers: ['ean_reader', 'ean_8_reader', 'qr_code_reader'],
       multiple: false,
     },
     locate: true,
@@ -228,26 +391,26 @@ function startScan() {
 
   Quagga.onDetected(function(result) {
     if (!result || !result.codeResult) return;
-    if (pendingCode) return; // already showing confirmation
+    if (pendingCode) return;
 
     const code = result.codeResult.code;
     const format = result.codeResult.format;
+    const isQR = format === 'qr_code';
 
-    // Filter low confidence
-    const errors = result.codeResult.decodedCodes
-      .filter(c => c.error !== undefined)
-      .map(c => c.error);
-    const avgError = errors.length ? errors.reduce((a,b) => a+b, 0) / errors.length : 1;
-    if (avgError > 0.25) return;
+    // Filter low confidence for EAN only
+    if (!isQR) {
+      const errors = result.codeResult.decodedCodes
+        .filter(c => c.error !== undefined).map(c => c.error);
+      const avgError = errors.length ? errors.reduce((a,b) => a+b, 0) / errors.length : 1;
+      if (avgError > 0.25) return;
+    }
 
-    // Pause and show confirmation
     Quagga.pause();
     pendingCode = code;
-    pendingType = format === 'qr_code' ? 'QR' : 'Barcode (' + format + ')';
-
+    pendingIsQR = isQR;
     beep();
-    showModal(code, pendingType);
-    setStatus('⏸ Código detectado — confirma o repite', 'paused');
+    showModal(code, isQR);
+    setStatus('⏸ Confirma o repite', 'paused');
   });
 }
 
@@ -260,32 +423,17 @@ function stopScan() {
   setStatus('Escáner detenido', '');
 }
 
-function confirmScan() {
-  if (!pendingCode) return;
-  addRecord(pendingCode, pendingType);
-  pendingCode = null;
-  pendingType = null;
-  hideModal();
-  // Resume scanning for next code
-  if (quaggaRunning) {
-    Quagga.start();
-    setStatus('✓ Guardado — apunta al siguiente código', 'ok');
-  }
-}
-
-function retryScanning() {
-  pendingCode = null;
-  pendingType = null;
-  hideModal();
-  if (quaggaRunning) {
-    Quagga.start();
-    setStatus('✓ Apunta el código al recuadro', 'ok');
-  }
-}
-
-function showModal(code, type) {
+function showModal(code, isQR) {
+  document.getElementById('modal-icon').textContent = isQR ? '📍' : '🏷️';
+  document.getElementById('modal-tag').textContent = isQR ? 'QR — Ubicación' : 'EAN-13 — Producto';
+  document.getElementById('modal-tag').className = 'modal-tag ' + (isQR ? 'qr' : 'ean');
+  document.getElementById('modal-label').textContent = isQR ? 'Nueva ubicación detectada' : 'Producto detectado';
   document.getElementById('modal-code').textContent = code;
-  document.getElementById('modal-format').textContent = type;
+  document.getElementById('modal-code').className = 'modal-code ' + (isQR ? 'qr-code' : 'ean-code');
+  document.getElementById('modal-sublabel').textContent = isQR
+    ? 'Se establecerá como ubicación activa'
+    : (currentLocation ? `Ubicación: ${currentLocation}` : '⚠️ Sin ubicación — escanea un QR primero');
+  document.getElementById('modal-ok-btn').textContent = isQR ? '✓ Establecer' : '✓ Guardar';
   document.getElementById('modal').classList.add('show');
 }
 
@@ -293,10 +441,140 @@ function hideModal() {
   document.getElementById('modal').classList.remove('show');
 }
 
+function confirmScan() {
+  if (!pendingCode) return;
+  if (pendingIsQR) {
+    // Set location
+    currentLocation = pendingCode;
+    localStorage.setItem('almacen_location', currentLocation);
+    updateLocationBanner();
+    toast('📍 Ubicación: ' + currentLocation, 'info');
+  } else {
+    // Add EAN record
+    if (!currentLocation) {
+      toast('⚠️ Escanea primero un QR de ubicación', 'err');
+    } else {
+      addRecord(pendingCode, 'EAN-13');
+    }
+  }
+  pendingCode = null;
+  pendingIsQR = false;
+  hideModal();
+  if (quaggaRunning) {
+    Quagga.start();
+    setStatus('✓ Apunta el siguiente código', 'ok');
+  }
+}
+
+function retryScanning() {
+  pendingCode = null;
+  pendingIsQR = false;
+  hideModal();
+  if (quaggaRunning) {
+    Quagga.start();
+    setStatus('✓ Apunta el código al recuadro', 'ok');
+  }
+}
+
 function setStatus(msg, type) {
   const el = document.getElementById('status');
   el.textContent = msg;
   el.className = 'status' + (type ? ' ' + type : '');
+}
+
+function updateLocationBanner() {
+  const banner = document.getElementById('location-banner');
+  const name = document.getElementById('location-name');
+  const count = document.getElementById('location-count');
+  if (currentLocation) {
+    banner.classList.add('active');
+    name.className = 'location-name';
+    name.textContent = currentLocation;
+    const n = records.filter(r => r.location === currentLocation).length;
+    count.textContent = n + ' producto' + (n !== 1 ? 's' : '') + ' en esta ubicación';
+  } else {
+    banner.classList.remove('active');
+    name.className = 'location-name empty';
+    name.textContent = 'Escanea un QR para establecer ubicación';
+    count.textContent = '';
+  }
+}
+
+// ---- Records ----
+function addRecord(code, type) {
+  const rec = {
+    id: records.length ? Math.max(...records.map(r => r.id)) + 1 : 1,
+    location: currentLocation,
+    code, type,
+    date: new Date().toLocaleString('es-ES'),
+    note: '',
+    synced: false,
+  };
+  records.unshift(rec);
+  save(); updateStats(); renderTable(); updateLocationBanner();
+  appendToSheet(rec);
+  toast('✓ ' + code + ' → ' + currentLocation, 'ok');
+}
+
+function addManual() {
+  const inp = document.getElementById('manual-inp');
+  const v = inp.value.trim();
+  if (!v) { toast('Introduce un EAN', 'err'); return; }
+  if (!currentLocation) { toast('⚠️ Escanea primero un QR de ubicación', 'err'); return; }
+  addRecord(v, 'Manual');
+  inp.value = '';
+}
+
+function deleteRec(id) {
+  records = records.filter(r => r.id !== id);
+  save(); updateStats(); renderTable(); updateLocationBanner();
+}
+
+function clearAll() {
+  if (!records.length) return;
+  if (!confirm('¿Eliminar todos los registros locales?')) return;
+  records = []; save(); updateStats(); renderTable(); updateLocationBanner();
+}
+
+function save() { localStorage.setItem('almacen_v1', JSON.stringify(records)); }
+
+function updateStats() {
+  document.getElementById('s-total').textContent = records.length;
+  const locs = new Set(records.map(r => r.location)).size;
+  document.getElementById('s-locs').textContent = locs;
+  pendingSync = records.filter(r => !r.synced).length;
+  document.getElementById('s-pending').textContent = pendingSync;
+}
+
+function renderTable() {
+  const data = records;
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map(r => {
+    const bc = r.type === 'Manual' ? 'b-man' : 'b-ean';
+    const syncIcon = r.synced ? '☁️' : '⏳';
+    return `<tr>
+      <td style="color:#3a3f5a;font-size:11px">${r.id} ${syncIcon}</td>
+      <td class="loc-td" title="${r.location}">${r.location || '—'}</td>
+      <td class="code-td" title="${r.code}">${r.code}</td>
+      <td><span class="badge ${bc}">${r.type}</span></td>
+      <td style="font-size:11px;color:#5a5f7a;white-space:nowrap">${r.date}</td>
+      <td><button class="del-btn" onclick="deleteRec(${r.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function exportXLS() {
+  if (!records.length) { toast('Sin registros', 'err'); return; }
+  const data = records.map(r => ({ 'Ubicación': r.location, 'EAN': r.code, 'Tipo': r.type, 'Fecha/Hora': r.date, 'Nota': r.note || '' }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  ws['!cols'] = [{ wch: 20 }, { wch: 18 }, { wch: 10 }, { wch: 20 }, { wch: 20 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+  XLSX.writeFile(wb, 'inventario_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+  toast('Excel exportado ✓', 'ok');
 }
 
 function beep() {
@@ -311,73 +589,6 @@ function beep() {
   } catch(e) {}
 }
 
-function addRecord(code, type) {
-  const rec = {
-    id: records.length ? Math.max(...records.map(r => r.id)) + 1 : 1,
-    code, type,
-    date: new Date().toLocaleString('es-ES'),
-    note: ''
-  };
-  records.unshift(rec);
-  save(); updateStats(); renderTable();
-  toast('✓ Guardado: ' + code, 'ok');
-}
-
-function addManual() {
-  const inp = document.getElementById('manual-inp');
-  const v = inp.value.trim();
-  if (!v) { toast('Introduce un código', 'err'); return; }
-  addRecord(v, 'Manual');
-  inp.value = '';
-}
-
-function deleteRec(id) { records = records.filter(r => r.id !== id); save(); updateStats(); renderTable(); }
-function updateNote(id, val) { const r = records.find(r => r.id === id); if (r) { r.note = val; save(); } }
-function clearAll() { if (!records.length) return; if (!confirm('¿Eliminar todos?')) return; records = []; save(); updateStats(); renderTable(); }
-function save() { localStorage.setItem('scan_q3', JSON.stringify(records)); }
-
-function updateStats() {
-  document.getElementById('s-total').textContent = records.length;
-  document.getElementById('s-qr').textContent = records.filter(r => r.type.startsWith('QR')).length;
-  document.getElementById('s-bar').textContent = records.filter(r => r.type.startsWith('Barcode')).length;
-}
-
-function setFilter(type, btn) {
-  filterType = type;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); renderTable();
-}
-
-function renderTable() {
-  let data = filterType === 'all' ? records : records.filter(r => r.type.startsWith(filterType));
-  const tbody = document.getElementById('tbody');
-  const empty = document.getElementById('empty');
-  if (!data.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  tbody.innerHTML = data.map(r => {
-    const bc = r.type.startsWith('QR') ? 'b-qr' : r.type === 'Manual' ? 'b-man' : 'b-bar';
-    return `<tr>
-      <td style="color:#3a3f5a;font-size:11px">${r.id}</td>
-      <td class="code-td" title="${r.code}">${r.code}</td>
-      <td><span class="badge ${bc}">${r.type}</span></td>
-      <td style="font-size:11px;color:#5a5f7a;white-space:nowrap">${r.date}</td>
-      <td><input class="note-inp" value="${(r.note||'').replace(/"/g,'&quot;')}" placeholder="Nota..." onchange="updateNote(${r.id},this.value)"></td>
-      <td><button class="del-btn" onclick="deleteRec(${r.id})">✕</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function exportXLS() {
-  if (!records.length) { toast('Sin registros', 'err'); return; }
-  const data = records.map(r => ({ 'ID': r.id, 'Código': r.code, 'Tipo': r.type, 'Fecha/Hora': r.date, 'Nota': r.note || '' }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  ws['!cols'] = [{ wch: 5 }, { wch: 42 }, { wch: 14 }, { wch: 20 }, { wch: 30 }];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Códigos');
-  XLSX.writeFile(wb, 'codigos_' + new Date().toISOString().slice(0, 10) + '.xlsx');
-  toast('Excel exportado ✓', 'ok');
-}
-
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -386,8 +597,11 @@ function toast(msg, type = '') {
   el._t = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
+// ---- Init ----
 updateStats();
 renderTable();
+updateLocationBanner();
+initSheet();
 </script>
 </body>
 </html>
