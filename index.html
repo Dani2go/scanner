@@ -5,21 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Scanner Almacén</title>
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.9.0/lib/jsrsasign-all-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e8eaf0; padding: 16px; max-width: 700px; margin: 0 auto; }
 h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .sub { font-size: 13px; color: #8b8fa8; text-align: center; margin-bottom: 16px; }
-
-/* Location banner */
-.location-banner {
-  border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
-  display: flex; align-items: center; gap: 12px;
-  background: #1a1e30; border: 1px solid #252840;
-  transition: all .3s;
-}
+.location-banner { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; background: #1a1e30; border: 1px solid #252840; transition: all .3s; }
 .location-banner.active { background: #0f2d1a; border-color: #1a5a30; }
 .location-icon { font-size: 28px; }
 .location-info { flex: 1; }
@@ -27,15 +19,12 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .location-name { font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 2px; }
 .location-name.empty { color: #3a3f5a; font-size: 14px; font-weight: 400; }
 .location-count { font-size: 11px; color: #2a7a40; margin-top: 2px; }
-
 .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .stat { background: #1e2235; border-radius: 10px; padding: 12px; text-align: center; }
 .stat-val { font-size: 24px; font-weight: 700; }
 .stat-lbl { font-size: 11px; color: #5a5f7a; margin-top: 2px; }
-
 .card { background: #161924; border: 1px solid #252840; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
 .card-title { font-size: 11px; font-weight: 600; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-
 #scanner-container { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
 #scanner-container video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
 #scanner-container canvas { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; }
@@ -54,27 +43,23 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .status.err { color: #f87171; background: #2d1a1a; }
 .status.loading { color: #60a5fa; background: #0f1a2d; }
 .status.paused { color: #fbbf24; background: #2d250f; }
-
 .btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .btn { flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid #2a2f47; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-start { background: #3b4cca; border-color: #4a5ce0; color: #fff; }
 .btn-start:not(:disabled):hover { background: #4a5ce0; }
 .btn-stop { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
-
 .manual-row { display: flex; gap: 8px; margin-top: 12px; }
 .manual-row input { flex: 1; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; padding: 10px 12px; color: #e8eaf0; font-size: 14px; outline: none; }
 .manual-row input::placeholder { color: #4a4f6a; }
 .manual-row input:focus { border-color: #3b4cca; }
 .btn-add { flex: 0; padding: 10px 16px; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; color: #c8cce8; font-size: 14px; cursor: pointer; }
-
-/* Confirmation modal */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .modal-bg.show { opacity: 1; pointer-events: all; }
 .modal { background: #161924; border: 1px solid #252840; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; transform: scale(0.95); transition: transform .2s; }
 .modal-bg.show .modal { transform: scale(1); }
 .modal-icon { font-size: 36px; text-align: center; margin-bottom: 10px; }
-.modal-tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 auto 8px; display: block; width: fit-content; }
+.modal-tag { display: block; width: fit-content; margin: 0 auto 8px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 .modal-tag.qr { background: #1a2d4a; color: #60a5fa; }
 .modal-tag.ean { background: #1a2d1a; color: #4ade80; }
 .modal-label { font-size: 11px; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; text-align: center; margin-bottom: 6px; }
@@ -87,23 +72,18 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .modal-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .modal-btn-ok:hover { background: #1a3d25; }
 .modal-btn-retry { background: #2d250f; border-color: #5a4a20; color: #fbbf24; }
-.modal-btn-retry:hover { background: #3d350f; }
-
-/* Sync indicator */
 .sync-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 14px; background: #1a1e30; border: 1px solid #252840; }
 .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #3a3f5a; flex-shrink: 0; }
 .sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
 .sync-dot.synced { background: #4ade80; }
 .sync-dot.error { background: #f87171; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
 .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .actions { display: flex; gap: 6px; }
 .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 7px; border: 1px solid; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
 .btn-clear { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
 .btn-export { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .btn-export:hover { background: #1a3d25; }
-
 .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #252840; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead tr { background: #1a1e30; }
@@ -120,7 +100,6 @@ td { padding: 9px 12px; color: #c8cce8; }
 .del-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; color: #3a3f5a; font-size: 14px; }
 .del-btn:hover { color: #f87171; }
 .empty { text-align: center; padding: 36px 20px; color: #3a3f5a; font-size: 13px; }
-
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); padding: 10px 20px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all .25s; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.ok { background: #0f2d1a; border: 1px solid #1a5a30; color: #4ade80; }
@@ -133,13 +112,11 @@ td { padding: 9px 12px; color: #c8cce8; }
 <h1>📦 Scanner Almacén</h1>
 <p class="sub">Escanea ubicación QR → luego EAN-13</p>
 
-<!-- Sync status -->
 <div class="sync-bar">
   <div class="sync-dot" id="sync-dot"></div>
-  <span id="sync-text">Sin sincronizar</span>
+  <span id="sync-text">Conectando a Google Sheets...</span>
 </div>
 
-<!-- Current location -->
 <div class="location-banner" id="location-banner">
   <div class="location-icon">📍</div>
   <div class="location-info">
@@ -149,14 +126,12 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
-<!-- Stats -->
 <div class="stats">
   <div class="stat"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total EAN</div></div>
   <div class="stat"><div class="stat-val" id="s-locs" style="color:#60a5fa">0</div><div class="stat-lbl">Ubicaciones</div></div>
   <div class="stat"><div class="stat-val" id="s-pending" style="color:#fbbf24">0</div><div class="stat-lbl">Sin sync</div></div>
 </div>
 
-<!-- Scanner -->
 <div class="card">
   <div class="card-title">Escáner</div>
   <div id="scanner-container">
@@ -167,7 +142,7 @@ td { padding: 9px 12px; color: #c8cce8; }
         <div class="corner bl"></div><div class="corner br"></div>
       </div>
     </div>
-    <div class="hint-txt" id="scan-hint">QR = ubicación · EAN-13 = producto</div>
+    <div class="hint-txt">QR = ubicación · EAN-13 = producto</div>
   </div>
   <div class="status" id="status">Pulsa Iniciar para activar la cámara</div>
   <div class="btn-row">
@@ -180,7 +155,6 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
-<!-- Records -->
 <div class="card">
   <div class="toolbar">
     <div class="card-title" style="margin-bottom:0">Registros</div>
@@ -200,7 +174,6 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
-<!-- Confirmation modal -->
 <div class="modal-bg" id="modal">
   <div class="modal">
     <div class="modal-icon" id="modal-icon">🔍</div>
@@ -218,62 +191,57 @@ td { padding: 9px 12px; color: #c8cce8; }
 <div class="toast" id="toast"></div>
 
 <script>
-// ---- CONFIG ----
 const SHEET_ID = '12_EcOkWyq_ecKT4zgIQl22SC3OiSsOcg9eN5ECzkgp4';
-const SERVICE_ACCOUNT_EMAIL = 'scanner-app@scanner-almacen.iam.gserviceaccount.com';
-const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
-MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDKB9FCdfKsX/wW
-x3YuuiPj5pGG99eIEED+v3TrusOy3aXWrhIhV4g9lnm4BpystTBNsB0Uf9cL5QGK
-IW7gtIwc2Hdki3yOBmplBxL9AbJGxrsCzV6A8B0UBpIUvEfmcaSBNgYtExG0vP3Q
-2X3AJQxJM7Z9fKRofaT5STQ1qRpfPy1+kdw9MQlvSwpa0qPrr1EI0iXkoyc85BOn
-A1rQ4fRQVX9oOLq26UOdkGwhDvbcs2ZkdunnCo3DEKRs8VjFqyz1+up/l54a/kUn
-oBn0XKd6ayoI+aJwsjthb/KYbKdLs/cJjU+ssguQoAspVksuOz/a+ZkI3KK0Hc+b
-6YX5QSJBAgMBAAECggEACfHckSLxMR8Ab7ad0KsE/UDqRPSKPX5fVKrj/H6TB4j1
-kt26sr12TWHM2AwrRi0dFZXnuIyab1F0g/IlXRZGF11ocyCSnwMd1Z9FhgLBXc6G
-ghrN3hbzt3qjUjX6bBOH/3xDTZC0vGrZK6CpGf443pmXEBJEnYghyMubsFCEpc+F
-1LHFMxCPUvm7BhCTRdJDnQcjyTuB7Ij0PcBvLb8HKQHldBsglXCSLZAw377QgI7m
-nYyC6aq5745tJFMeiIMQL4DaIUlw7p2EaIbvUzRCiNgaE+rMBBs8tWix7iOG4Mgv
-WqiR7A9piA1poe6wKXpTpTph5k8CYmhjagTMmsrOAQKBgQD6xEQOX//yXCzZ8Gbh
-NeTs4qaJMRRcq1jDLWlKQn/9KK9NbB1KV9JiVWnffI23AtNF8V5xMD+GGOBt+mFn
-GpLBm3H4x6AqS7MAED4XPju8+nS5TnstC7ak4m7RRN9Xo3odJj1lbrqrSjv5V5Sq
-kiaDpn6Ud0H811I8O7U43SJukQKBgQDOPy0eQ5RA2jdD9A4D6J1cvvLjTEsWvwZA
-3Ykq40bBCCQEHgZvNylSHUT8sn8CAPc0kfRoWkskDTHnMP5/RHEVSaEY6LmJtRI2
-K0YW20y9p+g98It6ZsmwJ+twdOydjzldO7hM6PNIMYZgRjlyQMifrCViJzIpUi39
-hVNb5v+wsQKBgDB33NuWbIbwj+6zy36+BvhOOngL126t46Md1Nr4jXpl8bQaMHMd
-FFnTPnpmvZFg52r+Yw2nkK+fgUlgepEODs2C+P1nwCpMpVVezlF5wtwc4JCsfZxQ
-RkYKSfcCw9RRkZmuuXEwfL38xCjGZ8KsKuuJM7AIeOWgzJE9zSIng68xAoGAAVWX
-TSLSyriesunZTV0r53W0zJOpyLPjrnfAc26U/pq24O/wyrdopQdbcucUu0aWUti+
-5A3xfoI3WG+QtfITaTfYuviGesWZIJCXG36/uFplvkDYJiqUE3eupkObZEmQ7XF9
-d8HqEQWBAQ5zQLH6mk3a0A/A21OUyJccOvP7o4ECgYB+h3a+vn+fsc9pvumD/Qp3
-Xj32ClCrfHL1Mmf3LhG+jm1Z70UpY8vBnUCFs89kOe+Cmeq8jDBt2N9vVcimrZ/G
-qCis/+lPDrzJDp+sH+pPig1kvoACgWTFGqzM/K7B5jOsl4EQfMQgHlXiGnJWjPPY
-aRoQr17mhUT+WLZ6UKxk0w==
------END PRIVATE KEY-----`;
+const SA_EMAIL = 'scanner-app@scanner-almacen.iam.gserviceaccount.com';
+// Private key — replace with new key after revoking this one
+const PK_B64 = `MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDKB9FCdfKsX/wWx3YuuiPj5pGG99eIEED+v3TrusOy3aXWrhIhV4g9lnm4BpystTBNsB0Uf9cL5QGKIW7gtIwc2Hdki3yOBmplBxL9AbJGxrsCzV6A8B0UBpIUvEfmcaSBNgYtExG0vP3Q2X3AJQxJM7Z9fKRofaT5STQ1qRpfPy1+kdw9MQlvSwpa0qPrr1EI0iXkoyc85BOnA1rQ4fRQVX9oOLq26UOdkGwhDvbcs2ZkdunnCo3DEKRs8VjFqyz1+up/l54a/kUnoBn0XKd6ayoI+aJwsjthb/KYbKdLs/cJjU+ssguQoAspVksuOz/a+ZkI3KK0Hc+b6YX5QSJBAgMBAAECggEACfHckSLxMR8Ab7ad0KsE/UDqRPSKPX5fVKrj/H6TB4j1kt26sr12TWHM2AwrRi0dFZXnuIyab1F0g/IlXRZGF11ocyCSnwMd1Z9FhgLBXc6GghrN3hbzt3qjUjX6bBOH/3xDTZC0vGrZK6CpGf443pmXEBJEnYghyMubsFCEpc+F1LHFMxCPUvm7BhCTRdJDnQcjyTuB7Ij0PcBvLb8HKQHldBsglXCSLZAw377QgI7mnYyC6aq5745tJFMeiIMQL4DaIUlw7p2EaIbvUzRCiNgaE+rMBBs8tWix7iOG4MgvWqiR7A9piA1poe6wKXpTpTph5k8CYmhjagTMmsrOAQKBgQD6xEQOX//yXCzZ8GbhNeTs4qaJMRRcq1jDLWlKQn/9KK9NbB1KV9JiVWnffI23AtNF8V5xMD+GGOBt+mFnGpLBm3H4x6AqS7MAED4XPju8+nS5TnstC7ak4m7RRN9Xo3odJj1lbrqrSjv5V5SqkiaDpn6Ud0H811I8O7U43SJukQKBgQDOPy0eQ5RA2jdD9A4D6J1cvvLjTEsWvwZA3Ykq40bBCCQEHgZvNylSHUT8sn8CAPc0kfRoWkskDTHnMP5/RHEVSaEY6LmJtRI2K0YW20y9p+g98It6ZsmwJ+twdOydjzldO7hM6PNIMYZgRjlyQMifrCViJzIpUi39hVNb5v+wsQKBgDB33NuWbIbwj+6zy36+BvhOOngL126t46Md1Nr4jXpl8bQaMHMdFFnTPnpmvZFg52r+Yw2nkK+fgUlgepEODs2C+P1nwCpMpVVezlF5wtwc4JCsfZxQRkYKSfcCw9RRkZmuuXEwfL38xCjGZ8KsKuuJM7AIeOWgzJE9zSIng68xAoGAAVWXTSLSyriesunZTV0r53W0zJOpyLPjrnfAc26U/pq24O/wyrdopQdbcucUu0aWUti+5A3xfoI3WG+QtfITaTfYuviGesWZIJCXG36/uFplvkDYJiqUE3eupkObZEmQ7XF9d8HqEQWBAQ5zQLH6mk3a0A/A21OUyJccOvP7o4ECgYB+h3a+vn+fsc9pvumD/Qp3Xj32ClCrfHL1Mmf3LhG+jm1Z70UpY8vBnUCFs89kOe+Cmeq8jDBt2N9vVcimrZ/GqCis/+lPDrzJDp+sH+pPig1kvoACgWTFGqzM/K7B5jOsl4EQfMQgHlXiGnJWjPPYaRoQr17mhUT+WLZ6UKxk0w==`;
 
 // ---- State ----
-let records = JSON.parse(localStorage.getItem('almacen_v1') || '[]');
-let currentLocation = localStorage.getItem('almacen_location') || '';
+let records = JSON.parse(localStorage.getItem('almacen_v2') || '[]');
+let currentLocation = localStorage.getItem('almacen_loc') || '';
 let quaggaRunning = false;
 let pendingCode = null;
 let pendingIsQR = false;
-let accessToken = null;
+let cachedToken = null;
 let tokenExpiry = 0;
-let pendingSync = 0;
 
-// ---- Google Auth (JWT) ----
+// ---- JWT via Web Crypto API ----
+function b64url(str) {
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+function b64urlFromArray(arr) {
+  return btoa(String.fromCharCode(...new Uint8Array(arr)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
 async function getAccessToken() {
-  if (accessToken && Date.now() < tokenExpiry - 60000) return accessToken;
+  if (cachedToken && Date.now() < tokenExpiry - 60000) return cachedToken;
   try {
     const now = Math.floor(Date.now() / 1000);
-    const header = { alg: 'RS256', typ: 'JWT' };
-    const claim = {
-      iss: SERVICE_ACCOUNT_EMAIL,
+    const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+    const payload = b64url(JSON.stringify({
+      iss: SA_EMAIL,
       scope: 'https://www.googleapis.com/auth/spreadsheets',
       aud: 'https://oauth2.googleapis.com/token',
       exp: now + 3600,
       iat: now,
-    };
-    const jwt = KJUR.jws.JWS.sign('RS256', JSON.stringify(header), JSON.stringify(claim), PRIVATE_KEY);
+    }));
+    const sigInput = header + '.' + payload;
+
+    // Import private key
+    const keyData = Uint8Array.from(atob(PK_B64), c => c.charCodeAt(0));
+    const key = await crypto.subtle.importKey(
+      'pkcs8', keyData.buffer,
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      false, ['sign']
+    );
+
+    // Sign
+    const enc = new TextEncoder();
+    const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, enc.encode(sigInput));
+    const jwt = sigInput + '.' + b64urlFromArray(sig);
+
+    // Exchange for access token
     const res = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -281,28 +249,31 @@ async function getAccessToken() {
     });
     const data = await res.json();
     if (data.access_token) {
-      accessToken = data.access_token;
-      tokenExpiry = Date.now() + (data.expires_in * 1000);
-      return accessToken;
+      cachedToken = data.access_token;
+      tokenExpiry = Date.now() + data.expires_in * 1000;
+      return cachedToken;
     }
-  } catch(e) {}
-  return null;
+    console.error('Token error:', data);
+    return null;
+  } catch(e) {
+    console.error('JWT error:', e);
+    return null;
+  }
 }
 
 async function initSheet() {
+  setSyncStatus('syncing', 'Conectando...');
   try {
     const token = await getAccessToken();
-    if (!token) { setSyncStatus('error', 'Sin conexión a Google'); return; }
-    // Check if header row exists
+    if (!token) { setSyncStatus('error', 'Error de autenticación'); return; }
     const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E1`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:F1`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const data = await res.json();
-    if (!data.values || !data.values[0]) {
-      // Add header row
+    if (!data.values || !data.values[0] || data.values[0][0] !== 'Ubicación') {
       await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E1?valueInputOption=RAW`,
+        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:F1?valueInputOption=RAW`,
         {
           method: 'PUT',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -310,17 +281,17 @@ async function initSheet() {
         }
       );
     }
-    setSyncStatus('synced', 'Conectado a Google Sheets');
+    setSyncStatus('synced', 'Conectado a Google Sheets ✓');
   } catch(e) {
-    setSyncStatus('error', 'Error al conectar');
+    setSyncStatus('error', 'Sin conexión: ' + e.message);
   }
 }
 
 async function appendToSheet(rec) {
+  setSyncStatus('syncing', 'Guardando...');
   try {
-    setSyncStatus('syncing', 'Guardando...');
     const token = await getAccessToken();
-    if (!token) { pendingSync++; updateStats(); setSyncStatus('error', 'Sin token'); return; }
+    if (!token) { rec.synced = false; save(); updateStats(); setSyncStatus('error', 'Sin token'); return; }
     const res = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:E:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
       {
@@ -330,94 +301,66 @@ async function appendToSheet(rec) {
       }
     );
     if (res.ok) {
-      rec.synced = true;
-      save();
-      pendingSync = records.filter(r => !r.synced).length;
-      updateStats();
+      rec.synced = true; save(); updateStats();
       setSyncStatus('synced', 'Sincronizado ✓');
     } else {
-      pendingSync++; updateStats();
+      const err = await res.json();
+      console.error('Sheets append error:', err);
       setSyncStatus('error', 'Error al guardar');
     }
   } catch(e) {
-    pendingSync = records.filter(r => !r.synced).length;
-    updateStats();
     setSyncStatus('error', 'Sin conexión');
   }
 }
 
 function setSyncStatus(state, msg) {
-  const dot = document.getElementById('sync-dot');
-  const txt = document.getElementById('sync-text');
-  dot.className = 'sync-dot ' + state;
-  txt.textContent = msg;
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-text').textContent = msg;
 }
 
 // ---- Scanner ----
 function startScan() {
   document.getElementById('btn-start').disabled = true;
-  setStatus('Iniciando escáner...', 'loading');
-
+  setStatus('Iniciando...', 'loading');
   Quagga.init({
     inputStream: {
       name: 'Live', type: 'LiveStream',
       target: document.getElementById('scanner-container'),
-      constraints: {
-        facingMode: 'environment',
-        width: { min: 640, ideal: 1280, max: 1920 },
-        height: { min: 480, ideal: 720, max: 1080 },
-      },
+      constraints: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
       area: { top: '25%', right: '5%', left: '5%', bottom: '25%' },
     },
     locator: { patchSize: 'medium', halfSample: false },
-    numOfWorkers: 0,
-    frequency: 10,
-    decoder: {
-      readers: ['ean_reader', 'ean_8_reader', 'qr_code_reader'],
-      multiple: false,
-    },
+    numOfWorkers: 0, frequency: 10,
+    decoder: { readers: ['ean_reader', 'ean_8_reader', 'qr_code_reader'], multiple: false },
     locate: true,
-  }, function(err) {
-    if (err) {
-      setStatus('Error: ' + err.message, 'err');
-      document.getElementById('btn-start').disabled = false;
-      return;
-    }
+  }, err => {
+    if (err) { setStatus('Error: ' + err.message, 'err'); document.getElementById('btn-start').disabled = false; return; }
     Quagga.start();
     quaggaRunning = true;
     document.getElementById('btn-stop').disabled = false;
     setStatus('✓ Apunta el código al recuadro', 'ok');
   });
 
-  Quagga.onDetected(function(result) {
-    if (!result || !result.codeResult) return;
-    if (pendingCode) return;
-
+  Quagga.onDetected(result => {
+    if (!result?.codeResult || pendingCode) return;
     const code = result.codeResult.code;
     const format = result.codeResult.format;
     const isQR = format === 'qr_code';
-
-    // Filter low confidence for EAN only
     if (!isQR) {
-      const errors = result.codeResult.decodedCodes
-        .filter(c => c.error !== undefined).map(c => c.error);
-      const avgError = errors.length ? errors.reduce((a,b) => a+b, 0) / errors.length : 1;
-      if (avgError > 0.25) return;
+      const errors = result.codeResult.decodedCodes.filter(c => c.error !== undefined).map(c => c.error);
+      const avg = errors.length ? errors.reduce((a,b) => a+b, 0) / errors.length : 1;
+      if (avg > 0.25) return;
     }
-
     Quagga.pause();
-    pendingCode = code;
-    pendingIsQR = isQR;
-    beep();
-    showModal(code, isQR);
+    pendingCode = code; pendingIsQR = isQR;
+    beep(); showModal(code, isQR);
     setStatus('⏸ Confirma o repite', 'paused');
   });
 }
 
 function stopScan() {
   if (quaggaRunning) { Quagga.stop(); quaggaRunning = false; }
-  pendingCode = null;
-  hideModal();
+  pendingCode = null; hideModal();
   document.getElementById('btn-start').disabled = false;
   document.getElementById('btn-stop').disabled = true;
   setStatus('Escáner detenido', '');
@@ -432,48 +375,31 @@ function showModal(code, isQR) {
   document.getElementById('modal-code').className = 'modal-code ' + (isQR ? 'qr-code' : 'ean-code');
   document.getElementById('modal-sublabel').textContent = isQR
     ? 'Se establecerá como ubicación activa'
-    : (currentLocation ? `Ubicación: ${currentLocation}` : '⚠️ Sin ubicación — escanea un QR primero');
+    : (currentLocation ? `Ubicación: ${currentLocation}` : '⚠️ Escanea primero un QR de ubicación');
   document.getElementById('modal-ok-btn').textContent = isQR ? '✓ Establecer' : '✓ Guardar';
   document.getElementById('modal').classList.add('show');
 }
 
-function hideModal() {
-  document.getElementById('modal').classList.remove('show');
-}
+function hideModal() { document.getElementById('modal').classList.remove('show'); }
 
 function confirmScan() {
   if (!pendingCode) return;
   if (pendingIsQR) {
-    // Set location
     currentLocation = pendingCode;
-    localStorage.setItem('almacen_location', currentLocation);
+    localStorage.setItem('almacen_loc', currentLocation);
     updateLocationBanner();
     toast('📍 Ubicación: ' + currentLocation, 'info');
   } else {
-    // Add EAN record
-    if (!currentLocation) {
-      toast('⚠️ Escanea primero un QR de ubicación', 'err');
-    } else {
-      addRecord(pendingCode, 'EAN-13');
-    }
+    if (!currentLocation) { toast('⚠️ Escanea primero un QR de ubicación', 'err'); }
+    else { addRecord(pendingCode, 'EAN-13'); }
   }
-  pendingCode = null;
-  pendingIsQR = false;
-  hideModal();
-  if (quaggaRunning) {
-    Quagga.start();
-    setStatus('✓ Apunta el siguiente código', 'ok');
-  }
+  pendingCode = null; pendingIsQR = false; hideModal();
+  if (quaggaRunning) { Quagga.start(); setStatus('✓ Apunta el siguiente código', 'ok'); }
 }
 
 function retryScanning() {
-  pendingCode = null;
-  pendingIsQR = false;
-  hideModal();
-  if (quaggaRunning) {
-    Quagga.start();
-    setStatus('✓ Apunta el código al recuadro', 'ok');
-  }
+  pendingCode = null; pendingIsQR = false; hideModal();
+  if (quaggaRunning) { Quagga.start(); setStatus('✓ Apunta el código al recuadro', 'ok'); }
 }
 
 function setStatus(msg, type) {
@@ -504,11 +430,9 @@ function updateLocationBanner() {
 function addRecord(code, type) {
   const rec = {
     id: records.length ? Math.max(...records.map(r => r.id)) + 1 : 1,
-    location: currentLocation,
-    code, type,
+    location: currentLocation, code, type,
     date: new Date().toLocaleString('es-ES'),
-    note: '',
-    synced: false,
+    note: '', synced: false,
   };
   records.unshift(rec);
   save(); updateStats(); renderTable(); updateLocationBanner();
@@ -521,55 +445,37 @@ function addManual() {
   const v = inp.value.trim();
   if (!v) { toast('Introduce un EAN', 'err'); return; }
   if (!currentLocation) { toast('⚠️ Escanea primero un QR de ubicación', 'err'); return; }
-  addRecord(v, 'Manual');
-  inp.value = '';
+  addRecord(v, 'Manual'); inp.value = '';
 }
 
-function deleteRec(id) {
-  records = records.filter(r => r.id !== id);
-  save(); updateStats(); renderTable(); updateLocationBanner();
-}
-
-function clearAll() {
-  if (!records.length) return;
-  if (!confirm('¿Eliminar todos los registros locales?')) return;
-  records = []; save(); updateStats(); renderTable(); updateLocationBanner();
-}
-
-function save() { localStorage.setItem('almacen_v1', JSON.stringify(records)); }
+function deleteRec(id) { records = records.filter(r => r.id !== id); save(); updateStats(); renderTable(); updateLocationBanner(); }
+function clearAll() { if (!records.length) return; if (!confirm('¿Eliminar todos?')) return; records = []; save(); updateStats(); renderTable(); updateLocationBanner(); }
+function save() { localStorage.setItem('almacen_v2', JSON.stringify(records)); }
 
 function updateStats() {
   document.getElementById('s-total').textContent = records.length;
-  const locs = new Set(records.map(r => r.location)).size;
-  document.getElementById('s-locs').textContent = locs;
-  pendingSync = records.filter(r => !r.synced).length;
-  document.getElementById('s-pending').textContent = pendingSync;
+  document.getElementById('s-locs').textContent = new Set(records.map(r => r.location)).size;
+  document.getElementById('s-pending').textContent = records.filter(r => !r.synced).length;
 }
 
 function renderTable() {
-  const data = records;
   const tbody = document.getElementById('tbody');
   const empty = document.getElementById('empty');
-  if (!data.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  if (!records.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  tbody.innerHTML = data.map(r => {
-    const bc = r.type === 'Manual' ? 'b-man' : 'b-ean';
-    const syncIcon = r.synced ? '☁️' : '⏳';
-    return `<tr>
-      <td style="color:#3a3f5a;font-size:11px">${r.id} ${syncIcon}</td>
-      <td class="loc-td" title="${r.location}">${r.location || '—'}</td>
-      <td class="code-td" title="${r.code}">${r.code}</td>
-      <td><span class="badge ${bc}">${r.type}</span></td>
-      <td style="font-size:11px;color:#5a5f7a;white-space:nowrap">${r.date}</td>
-      <td><button class="del-btn" onclick="deleteRec(${r.id})">✕</button></td>
-    </tr>`;
-  }).join('');
+  tbody.innerHTML = records.map(r => `<tr>
+    <td style="color:#3a3f5a;font-size:11px">${r.id} ${r.synced ? '☁️' : '⏳'}</td>
+    <td class="loc-td" title="${r.location}">${r.location || '—'}</td>
+    <td class="code-td" title="${r.code}">${r.code}</td>
+    <td><span class="badge ${r.type === 'Manual' ? 'b-man' : 'b-ean'}">${r.type}</span></td>
+    <td style="font-size:11px;color:#5a5f7a;white-space:nowrap">${r.date}</td>
+    <td><button class="del-btn" onclick="deleteRec(${r.id})">✕</button></td>
+  </tr>`).join('');
 }
 
 function exportXLS() {
   if (!records.length) { toast('Sin registros', 'err'); return; }
-  const data = records.map(r => ({ 'Ubicación': r.location, 'EAN': r.code, 'Tipo': r.type, 'Fecha/Hora': r.date, 'Nota': r.note || '' }));
-  const ws = XLSX.utils.json_to_sheet(data);
+  const ws = XLSX.utils.json_to_sheet(records.map(r => ({ 'Ubicación': r.location, 'EAN': r.code, 'Tipo': r.type, 'Fecha/Hora': r.date, 'Nota': r.note || '' })));
   ws['!cols'] = [{ wch: 20 }, { wch: 18 }, { wch: 10 }, { wch: 20 }, { wch: 20 }];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
@@ -597,11 +503,7 @@ function toast(msg, type = '') {
   el._t = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// ---- Init ----
-updateStats();
-renderTable();
-updateLocationBanner();
-initSheet();
+updateStats(); renderTable(); updateLocationBanner(); initSheet();
 </script>
 </body>
 </html>
