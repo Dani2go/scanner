@@ -12,21 +12,15 @@
 body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e8eaf0; padding: 16px; max-width: 700px; margin: 0 auto; }
 h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .sub { font-size: 13px; color: #8b8fa8; text-align: center; margin-bottom: 16px; }
-
-/* Mode switcher */
 .mode-switcher { display: flex; gap: 0; margin-bottom: 16px; background: #1a1e30; border-radius: 10px; padding: 4px; border: 1px solid #252840; }
 .mode-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; background: transparent; color: #5a5f7a; }
 .mode-btn.active { background: #3b4cca; color: #fff; }
-
-/* Sync */
 .sync-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 14px; background: #1a1e30; border: 1px solid #252840; }
 .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #3a3f5a; flex-shrink: 0; }
 .sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
 .sync-dot.synced { background: #4ade80; }
 .sync-dot.error { background: #f87171; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-/* Location banner */
 .location-banner { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; background: #1a1e30; border: 1px solid #252840; transition: all .3s; }
 .location-banner.active { background: #0f2d1a; border-color: #1a5a30; }
 .location-icon { font-size: 28px; }
@@ -35,18 +29,12 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .location-name { font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .location-name.empty { color: #3a3f5a; font-size: 14px; font-weight: 400; }
 .location-count { font-size: 11px; color: #2a7a40; margin-top: 2px; }
-
-/* Stats */
 .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .stat { background: #1e2235; border-radius: 10px; padding: 12px; text-align: center; }
 .stat-val { font-size: 24px; font-weight: 700; }
 .stat-lbl { font-size: 11px; color: #5a5f7a; margin-top: 2px; }
-
-/* Card */
 .card { background: #161924; border: 1px solid #252840; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
 .card-title { font-size: 11px; font-weight: 600; color: #5a5f7a; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-
-/* Scanner */
 .video-wrap { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; }
 #quagga-container { position: absolute; inset: 0; }
 #quagga-container video { width: 100% !important; height: 100% !important; object-fit: cover !important; position: absolute !important; top: 0 !important; left: 0 !important; }
@@ -62,27 +50,22 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .corner.bl { bottom:-2px; left:-2px; border-width: 0 0 3px 3px; }
 .corner.br { bottom:-2px; right:-2px; border-width: 0 3px 3px 0; }
 .hint-txt { position: absolute; bottom: 8px; width: 100%; text-align: center; font-size: 11px; color: rgba(255,255,255,0.45); pointer-events: none; z-index: 21; }
-
 .status { background: #1a1e30; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #5a5f7a; text-align: center; margin-top: 10px; min-height: 34px; display: flex; align-items: center; justify-content: center; }
 .status.ok { color: #4ade80; background: #0f2d1a; }
 .status.err { color: #f87171; background: #2d1a1a; }
 .status.loading { color: #60a5fa; background: #0f1a2d; }
 .status.paused { color: #fbbf24; background: #2d250f; }
-
 .btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .btn { flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid #2a2f47; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-start { background: #3b4cca; border-color: #4a5ce0; color: #fff; }
 .btn-start:not(:disabled):hover { background: #4a5ce0; }
 .btn-stop { background: #2d1a1a; border-color: #5a2020; color: #f87171; }
-
 .manual-row { display: flex; gap: 8px; margin-top: 12px; }
 .manual-row input { flex: 1; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; padding: 10px 12px; color: #e8eaf0; font-size: 14px; outline: none; }
 .manual-row input::placeholder { color: #4a4f6a; }
 .manual-row input:focus { border-color: #3b4cca; }
 .btn-add { flex: 0; padding: 10px 16px; background: #1e2235; border: 1px solid #2a2f47; border-radius: 8px; color: #c8cce8; font-size: 14px; cursor: pointer; }
-
-/* Result card (reposición) */
 .result-card { border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none; }
 .result-card.found { background: #0f2d1a; border: 1px solid #1a5a30; }
 .result-card.not-found { background: #2d1a0f; border: 1px solid #5a3a1a; }
@@ -101,10 +84,7 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .result-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all .15s; }
 .result-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .result-btn-assign { background: #0f1a2d; border-color: #1a3a6a; color: #60a5fa; }
-.result-btn-assign:hover { background: #1a2d4a; }
 .result-btn-cancel { background: #1a1e30; border-color: #252840; color: #5a5f7a; }
-
-/* Modal (inventario confirm) */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .modal-bg.show { opacity: 1; pointer-events: all; }
 .modal { background: #161924; border: 1px solid #252840; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; transform: scale(0.95); transition: transform .2s; }
@@ -123,8 +103,6 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .modal-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .modal-btn-ok:hover { background: #1a3d25; }
 .modal-btn-retry { background: #2d250f; border-color: #5a4a20; color: #fbbf24; }
-
-/* Table */
 .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .actions { display: flex; gap: 6px; }
 .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 7px; border: 1px solid; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
@@ -148,13 +126,11 @@ td { padding: 9px 12px; color: #c8cce8; }
 .del-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; color: #3a3f5a; font-size: 14px; }
 .del-btn:hover { color: #f87171; }
 .empty { text-align: center; padding: 36px 20px; color: #3a3f5a; font-size: 13px; }
-
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); padding: 10px 20px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all .25s; z-index: 999; white-space: nowrap; max-width: 90vw; text-align: center; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.ok { background: #0f2d1a; border: 1px solid #1a5a30; color: #4ade80; }
 .toast.err { background: #2d1a1a; border: 1px solid #5a2020; color: #f87171; }
 .toast.info { background: #0f1a2d; border: 1px solid #1a3a6a; color: #60a5fa; }
-
 .hidden { display: none !important; }
 </style>
 </head>
@@ -162,7 +138,6 @@ td { padding: 9px 12px; color: #c8cce8; }
 
 <h1>📦 Scanner Almacén v2</h1>
 
-<!-- Mode switcher -->
 <div class="mode-switcher">
   <button class="mode-btn active" id="btn-mode-inv" onclick="setMode('inventario')">📋 Inventario</button>
   <button class="mode-btn" id="btn-mode-rep" onclick="setMode('reposicion')">🔄 Reposición</button>
@@ -173,7 +148,6 @@ td { padding: 9px 12px; color: #c8cce8; }
   <span id="sync-text">Listo</span>
 </div>
 
-<!-- INVENTARIO: location banner -->
 <div class="location-banner" id="inv-location-banner">
   <div class="location-icon">📍</div>
   <div class="location-info">
@@ -183,14 +157,12 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
-<!-- INVENTARIO: stats -->
 <div class="stats" id="inv-stats">
   <div class="stat"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total EAN</div></div>
   <div class="stat"><div class="stat-val" id="s-locs" style="color:#60a5fa">0</div><div class="stat-lbl">Ubicaciones</div></div>
   <div class="stat"><div class="stat-val" id="s-pending" style="color:#fbbf24">0</div><div class="stat-lbl">Sin sync</div></div>
 </div>
 
-<!-- REPOSICIÓN: result card -->
 <div class="result-card" id="result-card">
   <div class="result-ean" id="result-ean"></div>
   <div class="result-title" id="result-title"></div>
@@ -198,7 +170,6 @@ td { padding: 9px 12px; color: #c8cce8; }
   <div class="result-actions" id="result-actions"></div>
 </div>
 
-<!-- Scanner (shared) -->
 <div class="card">
   <div class="card-title" id="scanner-card-title">Escáner — Inventario</div>
   <div class="video-wrap">
@@ -224,7 +195,6 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
-<!-- INVENTARIO: table -->
 <div class="card" id="inv-table-card">
   <div class="toolbar">
     <div class="card-title" style="margin-bottom:0">Registros</div>
@@ -242,7 +212,6 @@ td { padding: 9px 12px; color: #c8cce8; }
   </div>
 </div>
 
-<!-- Confirmation modal (inventario) -->
 <div class="modal-bg" id="modal">
   <div class="modal">
     <div class="modal-icon" id="modal-icon">🔍</div>
@@ -251,7 +220,7 @@ td { padding: 9px 12px; color: #c8cce8; }
     <div class="modal-code" id="modal-code">—</div>
     <div class="modal-sublabel" id="modal-sublabel"></div>
     <div class="modal-btns">
-      <button class="modal-btn modal-btn-retry" onclick="retryScanning()">↺ Repetir</button>
+      <button class="modal-btn modal-btn-retry" id="modal-retry-btn" onclick="retryScanning()">↺ Repetir</button>
       <button class="modal-btn modal-btn-ok" id="modal-ok-btn" onclick="confirmScan()">✓ Guardar</button>
     </div>
   </div>
@@ -262,17 +231,14 @@ td { padding: 9px 12px; color: #c8cce8; }
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysRZdpGz0GKURPB9CYrelSnu8GUHucn6Vez70oXF5_g1vEZEzHAWBZFbi8WbZOLY8I/exec';
 
-// ---- State ----
-let currentMode = 'inventario'; // 'inventario' | 'reposicion'
+let currentMode = 'inventario';
 let records = JSON.parse(localStorage.getItem('almacen_v5') || '[]');
 let currentLocation = localStorage.getItem('almacen_loc') || '';
 let quaggaRunning = false;
 let pendingCode = null;
 let pendingIsQR = false;
 let qrRafId = null;
-
-// Reposición state
-let repStep = 'scan-ean'; // 'scan-ean' | 'scan-qr-assign'
+let repStep = 'scan-ean';
 let repCurrentEAN = null;
 
 // ---- Mode ----
@@ -280,6 +246,8 @@ function setMode(mode) {
   currentMode = mode;
   stopScan();
   hideResultCard();
+  repStep = 'scan-ean';
+  repCurrentEAN = null;
 
   document.getElementById('btn-mode-inv').classList.toggle('active', mode === 'inventario');
   document.getElementById('btn-mode-rep').classList.toggle('active', mode === 'reposicion');
@@ -291,11 +259,9 @@ function setMode(mode) {
   if (mode === 'inventario') {
     document.getElementById('scanner-card-title').textContent = 'Escáner — Inventario';
     document.getElementById('scan-hint').textContent = 'QR = ubicación · EAN-13 = producto';
-    repStep = 'scan-ean';
   } else {
     document.getElementById('scanner-card-title').textContent = 'Escáner — Reposición';
     document.getElementById('scan-hint').textContent = 'Escanea el EAN-13 del producto';
-    repStep = 'scan-ean';
   }
 }
 
@@ -310,7 +276,7 @@ async function sendToSheet(data) {
     });
     const result = JSON.parse(await res.text());
     if (result.ok) { setSyncStatus('synced', 'Sincronizado ✓'); return true; }
-    else { setSyncStatus('error', 'Error Sheets'); return false; }
+    setSyncStatus('error', 'Error Sheets'); return false;
   } catch(e) { setSyncStatus('error', 'Sin conexión'); return false; }
 }
 
@@ -321,10 +287,7 @@ async function buscarUbicacion(ean) {
     const data = JSON.parse(await res.text());
     setSyncStatus('synced', 'Listo');
     return data;
-  } catch(e) {
-    setSyncStatus('error', 'Sin conexión');
-    return { ok: false, ubicaciones: [] };
-  }
+  } catch(e) { setSyncStatus('error', 'Sin conexión'); return { ok: false, ubicaciones: [] }; }
 }
 
 async function syncPending() {
@@ -406,8 +369,8 @@ function stopScan() {
 }
 
 function resumeScan() {
+  pendingCode = null;
   if (quaggaRunning) {
-    pendingCode = null;
     Quagga.start();
     const videoEl = document.querySelector('#quagga-container video');
     if (videoEl) startQRLoop(videoEl);
@@ -416,59 +379,107 @@ function resumeScan() {
 }
 
 // ---- Code detected ----
-async function onCodeDetected(code, isQR) {
+function onCodeDetected(code, isQR) {
   if (pendingCode) return;
   pendingCode = code;
   Quagga.pause(); stopQRLoop();
   beep();
 
   if (currentMode === 'inventario') {
-    // Inventario flow: modal confirmation
+    // Inventario: confirmation modal → save
     pendingIsQR = isQR;
-    showModal(code, isQR);
+    showModalInventario(code, isQR);
     setStatus('⏸ Confirma o repite', 'paused');
 
   } else {
-    // Reposición flow
+    // Reposición
     if (repStep === 'scan-ean' && !isQR) {
-      // Scanned EAN — look up location
-      repCurrentEAN = code;
-      setStatus('🔍 Buscando ubicación...', 'loading');
-      const result = await buscarUbicacion(code);
-      pendingCode = null;
-
-      if (result.ok && result.ubicaciones.length > 0) {
-        showResultFound(code, result.ubicaciones);
-      } else {
-        showResultNotFound(code);
-      }
+      // Step 1: confirm EAN before searching
+      showModalReposicion(code);
+      setStatus('⏸ Confirma el código', 'paused');
 
     } else if (repStep === 'scan-qr-assign' && isQR) {
-      // Scanned QR to assign location
-      const location = code;
-      const date = new Date().toLocaleString('es-ES');
-      setStatus('☁️ Guardando ubicación...', 'loading');
-      await sendToSheet({ action: 'asignar_ubicacion', ean: repCurrentEAN, location, date });
-
-      // Also save locally
-      const rec = {
-        id: records.length ? Math.max(...records.map(r=>r.id))+1 : 1,
-        location, code: repCurrentEAN, type: 'Reposición',
-        date, note: 'Asignado en reposición', synced: true,
-      };
-      records.unshift(rec); save(); updateStats(); renderTable();
-
-      showResultAssigned(repCurrentEAN, location);
-      repStep = 'scan-ean';
-      pendingCode = null;
+      // Step 3: assign QR location to EAN
+      assignLocation(code);
 
     } else if (repStep === 'scan-qr-assign' && !isQR) {
-      // Expected QR but got EAN — ignore and wait
+      // Expected QR but got EAN — ignore
+      pendingCode = null;
+      Quagga.start();
+      const videoEl = document.querySelector('#quagga-container video');
+      if (videoEl) startQRLoop(videoEl);
+    } else {
+      // QR scanned in reposición scan-ean step — ignore
       pendingCode = null;
       Quagga.start();
       const videoEl = document.querySelector('#quagga-container video');
       if (videoEl) startQRLoop(videoEl);
     }
+  }
+}
+
+// ---- Inventario modal ----
+function showModalInventario(code, isQR) {
+  document.getElementById('modal-icon').textContent = isQR ? '📍' : '🏷️';
+  document.getElementById('modal-tag').textContent = isQR ? 'QR — Ubicación' : 'EAN-13 — Producto';
+  document.getElementById('modal-tag').className = 'modal-tag ' + (isQR ? 'qr' : 'ean');
+  document.getElementById('modal-label').textContent = isQR ? 'Nueva ubicación' : 'Producto detectado';
+  document.getElementById('modal-code').textContent = code;
+  document.getElementById('modal-code').className = 'modal-code ' + (isQR ? 'qr-code' : 'ean-code');
+  document.getElementById('modal-sublabel').textContent = isQR
+    ? 'Se establecerá como ubicación activa'
+    : (currentLocation ? `Ubicación: ${currentLocation}` : '⚠️ Escanea primero un QR de ubicación');
+  document.getElementById('modal-ok-btn').textContent = isQR ? '✓ Establecer' : '✓ Guardar';
+  document.getElementById('modal-ok-btn').onclick = confirmScan;
+  document.getElementById('modal-retry-btn').onclick = retryScanning;
+  document.getElementById('modal').classList.add('show');
+}
+
+function confirmScan() {
+  const code = pendingCode;
+  const isQR = pendingIsQR;
+  hideModal();
+  if (isQR) {
+    currentLocation = code;
+    localStorage.setItem('almacen_loc', currentLocation);
+    updateLocationBanner();
+    toast('📍 ' + currentLocation, 'info');
+  } else {
+    if (!currentLocation) toast('⚠️ Escanea primero un QR', 'err');
+    else addRecord(code, 'EAN-13');
+  }
+  resumeScan();
+}
+
+function retryScanning() { hideModal(); resumeScan(); }
+
+// ---- Reposición modal ----
+function showModalReposicion(code) {
+  document.getElementById('modal-icon').textContent = '🏷️';
+  document.getElementById('modal-tag').textContent = 'EAN-13 — Producto';
+  document.getElementById('modal-tag').className = 'modal-tag ean';
+  document.getElementById('modal-label').textContent = '¿Es correcto este código?';
+  document.getElementById('modal-code').textContent = code;
+  document.getElementById('modal-code').className = 'modal-code ean-code';
+  document.getElementById('modal-sublabel').textContent = 'Confirma antes de buscar la ubicación';
+  document.getElementById('modal-ok-btn').textContent = '🔍 Buscar ubicación';
+  document.getElementById('modal-ok-btn').onclick = () => confirmarEANReposicion(code);
+  document.getElementById('modal-retry-btn').textContent = '↺ Repetir';
+  document.getElementById('modal-retry-btn').onclick = retryScanning;
+  document.getElementById('modal').classList.add('show');
+}
+
+async function confirmarEANReposicion(code) {
+  hideModal();
+  repCurrentEAN = code;
+  pendingCode = null;
+  setStatus('🔍 Buscando ubicación...', 'loading');
+  const result = await buscarUbicacion(code);
+
+  if (result.ok && result.ubicaciones.length > 0) {
+    showResultFound(code, result.ubicaciones);
+  } else {
+    showResultNotFound(code);
   }
 }
 
@@ -479,10 +490,8 @@ function showResultFound(ean, ubicaciones) {
   card.style.display = 'block';
   document.getElementById('result-ean').textContent = 'EAN: ' + ean;
   document.getElementById('result-title').className = 'result-title found';
-  document.getElementById('result-title').textContent = '✓ ' + ubicaciones.length + ' ubicación' + (ubicaciones.length > 1 ? 'es' : '') + ' encontrada' + (ubicaciones.length > 1 ? 's' : '');
-
-  const list = document.getElementById('ubicacion-list');
-  list.innerHTML = ubicaciones.map(u => `
+  document.getElementById('result-title').textContent = '✓ ' + ubicaciones.length + ' ubicación' + (ubicaciones.length > 1 ? 'es encontradas' : ' encontrada');
+  document.getElementById('ubicacion-list').innerHTML = ubicaciones.map(u => `
     <div class="ubicacion-item">
       <div class="ubicacion-icon">📍</div>
       <div>
@@ -491,11 +500,12 @@ function showResultFound(ean, ubicaciones) {
       </div>
     </div>
   `).join('');
-
   document.getElementById('result-actions').innerHTML = `
     <button class="result-btn result-btn-ok" onclick="clearResultAndResume()">✓ Entendido</button>
     <button class="result-btn result-btn-assign" onclick="startAssignQR()">+ Añadir ubicación</button>
   `;
+  if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
+  setStatus('✓ Ubicación encontrada', 'ok');
 }
 
 function showResultNotFound(ean) {
@@ -509,9 +519,11 @@ function showResultNotFound(ean) {
     <div style="font-size:13px;color:#fb923c;padding:4px 0">Este producto no tiene ubicación asignada en el inventario.</div>
   `;
   document.getElementById('result-actions').innerHTML = `
-    <button class="result-btn result-btn-assign" onclick="startAssignQR()">📍 Escanea QR para ubicar</button>
+    <button class="result-btn result-btn-assign" onclick="startAssignQR()">📍 Escanear QR para ubicar</button>
     <button class="result-btn result-btn-cancel" onclick="clearResultAndResume()">Cancelar</button>
   `;
+  if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
+  setStatus('⚠️ Sin ubicación — escanea QR para asignar', 'paused');
 }
 
 function showResultAssigned(ean, location) {
@@ -530,11 +542,6 @@ function showResultAssigned(ean, location) {
   document.getElementById('result-actions').innerHTML = `
     <button class="result-btn result-btn-ok" onclick="clearResultAndResume()">✓ Siguiente producto</button>
   `;
-  // Auto resume scanner
-  Quagga.start();
-  const videoEl = document.querySelector('#quagga-container video');
-  if (videoEl) startQRLoop(videoEl);
-  setStatus('✓ Apunta el siguiente código', 'ok');
 }
 
 function startAssignQR() {
@@ -544,18 +551,33 @@ function startAssignQR() {
   document.getElementById('result-title').className = 'result-title scanning-qr';
   document.getElementById('result-title').textContent = '📷 Escanea el QR de la ubicación';
   document.getElementById('ubicacion-list').innerHTML = `
-    <div style="font-size:13px;color:#60a5fa;padding:4px 0">Apunta la cámara al código QR de la estantería donde vas a dejar el producto.</div>
+    <div style="font-size:13px;color:#60a5fa;padding:4px 0">Apunta la cámara al QR de la estantería donde vas a dejar el producto.</div>
   `;
   document.getElementById('result-actions').innerHTML = `
     <button class="result-btn result-btn-cancel" onclick="cancelAssign()">Cancelar</button>
   `;
   document.getElementById('scan-hint').textContent = 'Escanea el QR de la ubicación';
   setStatus('📷 Esperando QR de ubicación...', 'loading');
-  // Resume scanner to capture QR
   pendingCode = null;
-  Quagga.start();
-  const videoEl = document.querySelector('#quagga-container video');
-  if (videoEl) startQRLoop(videoEl);
+  if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
+}
+
+async function assignLocation(locationQR) {
+  const date = new Date().toLocaleString('es-ES');
+  setStatus('☁️ Guardando ubicación...', 'loading');
+  await sendToSheet({ action: 'asignar_ubicacion', ean: repCurrentEAN, location: locationQR, date });
+  const rec = {
+    id: records.length ? Math.max(...records.map(r=>r.id))+1 : 1,
+    location: locationQR, code: repCurrentEAN, type: 'Reposición',
+    date, note: 'Asignado en reposición', synced: true,
+  };
+  records.unshift(rec); save(); updateStats(); renderTable();
+  repStep = 'scan-ean';
+  pendingCode = null;
+  showResultAssigned(repCurrentEAN, locationQR);
+  document.getElementById('scan-hint').textContent = 'Escanea el EAN-13 del producto';
+  if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
+  setStatus('✓ Siguiente producto', 'ok');
 }
 
 function cancelAssign() {
@@ -568,55 +590,15 @@ function clearResultAndResume() {
   hideResultCard();
   repStep = 'scan-ean';
   document.getElementById('scan-hint').textContent = 'Escanea el EAN-13 del producto';
-  pendingCode = null;
-  if (quaggaRunning) {
-    Quagga.start();
-    const videoEl = document.querySelector('#quagga-container video');
-    if (videoEl) startQRLoop(videoEl);
-    setStatus('✓ Escanea el siguiente producto', 'ok');
-  }
-}
-
-function hideResultCard() {
-  const card = document.getElementById('result-card');
-  card.style.display = 'none';
-  card.className = 'result-card';
-}
-
-// ---- Inventario modal ----
-function showModal(code, isQR) {
-  document.getElementById('modal-icon').textContent = isQR ? '📍' : '🏷️';
-  document.getElementById('modal-tag').textContent = isQR ? 'QR — Ubicación' : 'EAN-13 — Producto';
-  document.getElementById('modal-tag').className = 'modal-tag ' + (isQR ? 'qr' : 'ean');
-  document.getElementById('modal-label').textContent = isQR ? 'Nueva ubicación' : 'Producto detectado';
-  document.getElementById('modal-code').textContent = code;
-  document.getElementById('modal-code').className = 'modal-code ' + (isQR ? 'qr-code' : 'ean-code');
-  document.getElementById('modal-sublabel').textContent = isQR
-    ? 'Se establecerá como ubicación activa'
-    : (currentLocation ? `Ubicación: ${currentLocation}` : '⚠️ Escanea primero un QR de ubicación');
-  document.getElementById('modal-ok-btn').textContent = isQR ? '✓ Establecer' : '✓ Guardar';
-  document.getElementById('modal').classList.add('show');
-}
-function hideModal() { document.getElementById('modal').classList.remove('show'); }
-
-function confirmScan() {
-  if (!pendingCode) return;
-  const code = pendingCode;
-  const isQR = pendingIsQR;
-  if (isQR) {
-    currentLocation = code;
-    localStorage.setItem('almacen_loc', currentLocation);
-    updateLocationBanner();
-    toast('📍 ' + currentLocation, 'info');
-  } else {
-    if (!currentLocation) toast('⚠️ Escanea primero un QR', 'err');
-    else addRecord(code, 'EAN-13');
-  }
-  hideModal();
   resumeScan();
 }
 
-function retryScanning() { hideModal(); resumeScan(); }
+function hideResultCard() {
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('result-card').className = 'result-card';
+}
+
+function hideModal() { document.getElementById('modal').classList.remove('show'); }
 
 function setStatus(msg, type) {
   const el = document.getElementById('status');
@@ -640,7 +622,6 @@ function updateLocationBanner() {
   }
 }
 
-// ---- Records ----
 function addRecord(code, type) {
   const rec = {
     id: records.length ? Math.max(...records.map(r=>r.id))+1 : 1,
@@ -718,7 +699,6 @@ function toast(msg, type='') {
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-// ---- Init ----
 updateStats(); renderTable(); updateLocationBanner();
 if (records.some(r=>!r.synced)) syncPending();
 </script>
