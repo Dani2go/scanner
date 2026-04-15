@@ -81,7 +81,7 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .ubicacion-name { font-size: 16px; font-weight: 700; color: #f0f2ff; }
 .ubicacion-date { font-size: 11px; color: #5a5f7a; margin-top: 2px; }
 .result-actions { display: flex; gap: 8px; margin-top: 4px; }
-.result-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all .15s; }
+.result-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; }
 .result-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .result-btn-assign { background: #0f1a2d; border-color: #1a3a6a; color: #60a5fa; }
 .result-btn-cancel { background: #1a1e30; border-color: #252840; color: #5a5f7a; }
@@ -99,7 +99,7 @@ h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
 .modal-code.ean-code { color: #4ade80; }
 .modal-sublabel { font-size: 12px; color: #5a5f7a; text-align: center; margin-bottom: 20px; min-height: 18px; }
 .modal-btns { display: flex; gap: 10px; }
-.modal-btn { flex: 1; padding: 13px; border-radius: 10px; border: 1px solid; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; transition: all .15s; }
+.modal-btn { flex: 1; padding: 13px; border-radius: 10px; border: 1px solid; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; }
 .modal-btn-ok { background: #0f2d1a; border-color: #1a5a30; color: #4ade80; }
 .modal-btn-ok:hover { background: #1a3d25; }
 .modal-btn-retry { background: #2d250f; border-color: #5a4a20; color: #fbbf24; }
@@ -189,9 +189,17 @@ td { padding: 9px 12px; color: #c8cce8; }
     <button class="btn btn-start" id="btn-start" onclick="startScan()">▶ Iniciar</button>
     <button class="btn btn-stop" id="btn-stop" onclick="stopScan()" disabled>■ Detener</button>
   </div>
+
+  <!-- Manual input inventario -->
   <div class="manual-row" id="manual-row-inv">
     <input id="manual-inp" type="text" placeholder="EAN manual..." onkeydown="if(event.key==='Enter')addManual()">
     <button class="btn-add" onclick="addManual()">+ Añadir</button>
+  </div>
+
+  <!-- Manual input reposición -->
+  <div class="manual-row hidden" id="manual-row-rep">
+    <input id="manual-rep-inp" type="text" placeholder="EAN manual reposición..." onkeydown="if(event.key==='Enter')addManualRep()">
+    <button class="btn-add" onclick="addManualRep()">+ Buscar</button>
   </div>
 </div>
 
@@ -255,6 +263,7 @@ function setMode(mode) {
   document.getElementById('inv-stats').classList.toggle('hidden', mode === 'reposicion');
   document.getElementById('inv-table-card').classList.toggle('hidden', mode === 'reposicion');
   document.getElementById('manual-row-inv').classList.toggle('hidden', mode === 'reposicion');
+  document.getElementById('manual-row-rep').classList.toggle('hidden', mode === 'inventario');
 
   if (mode === 'inventario') {
     document.getElementById('scanner-card-title').textContent = 'Escáner — Inventario';
@@ -306,7 +315,6 @@ function setSyncStatus(state, msg) {
 function startScan() {
   document.getElementById('btn-start').disabled = true;
   setStatus('Iniciando...', 'loading');
-
   Quagga.init({
     inputStream: {
       name: 'Live', type: 'LiveStream',
@@ -355,9 +363,7 @@ function startQRLoop(videoEl) {
   qrRafId = requestAnimationFrame(tick);
 }
 
-function stopQRLoop() {
-  if (qrRafId) { cancelAnimationFrame(qrRafId); qrRafId = null; }
-}
+function stopQRLoop() { if (qrRafId) { cancelAnimationFrame(qrRafId); qrRafId = null; } }
 
 function stopScan() {
   stopQRLoop();
@@ -378,7 +384,7 @@ function resumeScan() {
   }
 }
 
-// ---- Code detected ----
+// ---- Code detected (camera) ----
 function onCodeDetected(code, isQR) {
   if (pendingCode) return;
   pendingCode = code;
@@ -386,34 +392,20 @@ function onCodeDetected(code, isQR) {
   beep();
 
   if (currentMode === 'inventario') {
-    // Inventario: confirmation modal → save
     pendingIsQR = isQR;
     showModalInventario(code, isQR);
     setStatus('⏸ Confirma o repite', 'paused');
-
   } else {
-    // Reposición
     if (repStep === 'scan-ean' && !isQR) {
-      // Step 1: confirm EAN before searching
       showModalReposicion(code);
       setStatus('⏸ Confirma el código', 'paused');
-
     } else if (repStep === 'scan-qr-assign' && isQR) {
-      // Step 3: assign QR location to EAN
       assignLocation(code);
-
-    } else if (repStep === 'scan-qr-assign' && !isQR) {
-      // Expected QR but got EAN — ignore
-      pendingCode = null;
-      Quagga.start();
-      const videoEl = document.querySelector('#quagga-container video');
-      if (videoEl) startQRLoop(videoEl);
     } else {
-      // QR scanned in reposición scan-ean step — ignore
       pendingCode = null;
       Quagga.start();
-      const videoEl = document.querySelector('#quagga-container video');
-      if (videoEl) startQRLoop(videoEl);
+      const v = document.querySelector('#quagga-container video');
+      if (v) startQRLoop(v);
     }
   }
 }
@@ -431,6 +423,7 @@ function showModalInventario(code, isQR) {
     : (currentLocation ? `Ubicación: ${currentLocation}` : '⚠️ Escanea primero un QR de ubicación');
   document.getElementById('modal-ok-btn').textContent = isQR ? '✓ Establecer' : '✓ Guardar';
   document.getElementById('modal-ok-btn').onclick = confirmScan;
+  document.getElementById('modal-retry-btn').textContent = '↺ Repetir';
   document.getElementById('modal-retry-btn').onclick = retryScanning;
   document.getElementById('modal').classList.add('show');
 }
@@ -453,7 +446,7 @@ function confirmScan() {
 
 function retryScanning() { hideModal(); resumeScan(); }
 
-// ---- Reposición modal ----
+// ---- Reposición modal (cámara y manual) ----
 function showModalReposicion(code) {
   document.getElementById('modal-icon').textContent = '🏷️';
   document.getElementById('modal-tag').textContent = 'EAN-13 — Producto';
@@ -465,7 +458,12 @@ function showModalReposicion(code) {
   document.getElementById('modal-ok-btn').textContent = '🔍 Buscar ubicación';
   document.getElementById('modal-ok-btn').onclick = () => confirmarEANReposicion(code);
   document.getElementById('modal-retry-btn').textContent = '↺ Repetir';
-  document.getElementById('modal-retry-btn').onclick = retryScanning;
+  document.getElementById('modal-retry-btn').onclick = () => {
+    hideModal();
+    pendingCode = null;
+    document.getElementById('manual-rep-inp').value = '';
+    resumeScan();
+  };
   document.getElementById('modal').classList.add('show');
 }
 
@@ -475,7 +473,6 @@ async function confirmarEANReposicion(code) {
   pendingCode = null;
   setStatus('🔍 Buscando ubicación...', 'loading');
   const result = await buscarUbicacion(code);
-
   if (result.ok && result.ubicaciones.length > 0) {
     showResultFound(code, result.ubicaciones);
   } else {
@@ -483,53 +480,53 @@ async function confirmarEANReposicion(code) {
   }
 }
 
+// ---- Manual reposición ----
+function addManualRep() {
+  const inp = document.getElementById('manual-rep-inp');
+  const v = inp.value.trim();
+  if (!v) { toast('Introduce un EAN', 'err'); return; }
+  inp.value = '';
+  pendingCode = v;
+  showModalReposicion(v);
+  setStatus('⏸ Confirma el código', 'paused');
+}
+
 // ---- Reposición result cards ----
 function showResultFound(ean, ubicaciones) {
   const card = document.getElementById('result-card');
-  card.className = 'result-card found';
-  card.style.display = 'block';
+  card.className = 'result-card found'; card.style.display = 'block';
   document.getElementById('result-ean').textContent = 'EAN: ' + ean;
   document.getElementById('result-title').className = 'result-title found';
   document.getElementById('result-title').textContent = '✓ ' + ubicaciones.length + ' ubicación' + (ubicaciones.length > 1 ? 'es encontradas' : ' encontrada');
   document.getElementById('ubicacion-list').innerHTML = ubicaciones.map(u => `
     <div class="ubicacion-item">
       <div class="ubicacion-icon">📍</div>
-      <div>
-        <div class="ubicacion-name">${u.ubicacion}</div>
-        <div class="ubicacion-date">${u.fecha || ''}</div>
-      </div>
-    </div>
-  `).join('');
+      <div><div class="ubicacion-name">${u.ubicacion}</div><div class="ubicacion-date">${u.fecha||''}</div></div>
+    </div>`).join('');
   document.getElementById('result-actions').innerHTML = `
     <button class="result-btn result-btn-ok" onclick="clearResultAndResume()">✓ Entendido</button>
-    <button class="result-btn result-btn-assign" onclick="startAssignQR()">+ Añadir ubicación</button>
-  `;
+    <button class="result-btn result-btn-assign" onclick="startAssignQR()">+ Añadir ubicación</button>`;
   if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
   setStatus('✓ Ubicación encontrada', 'ok');
 }
 
 function showResultNotFound(ean) {
   const card = document.getElementById('result-card');
-  card.className = 'result-card not-found';
-  card.style.display = 'block';
+  card.className = 'result-card not-found'; card.style.display = 'block';
   document.getElementById('result-ean').textContent = 'EAN: ' + ean;
   document.getElementById('result-title').className = 'result-title not-found';
   document.getElementById('result-title').textContent = '⚠️ Producto sin ubicación';
-  document.getElementById('ubicacion-list').innerHTML = `
-    <div style="font-size:13px;color:#fb923c;padding:4px 0">Este producto no tiene ubicación asignada en el inventario.</div>
-  `;
+  document.getElementById('ubicacion-list').innerHTML = `<div style="font-size:13px;color:#fb923c;padding:4px 0">Este producto no tiene ubicación asignada en el inventario.</div>`;
   document.getElementById('result-actions').innerHTML = `
     <button class="result-btn result-btn-assign" onclick="startAssignQR()">📍 Escanear QR para ubicar</button>
-    <button class="result-btn result-btn-cancel" onclick="clearResultAndResume()">Cancelar</button>
-  `;
+    <button class="result-btn result-btn-cancel" onclick="clearResultAndResume()">Cancelar</button>`;
   if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
   setStatus('⚠️ Sin ubicación — escanea QR para asignar', 'paused');
 }
 
 function showResultAssigned(ean, location) {
   const card = document.getElementById('result-card');
-  card.className = 'result-card found';
-  card.style.display = 'block';
+  card.className = 'result-card found'; card.style.display = 'block';
   document.getElementById('result-ean').textContent = 'EAN: ' + ean;
   document.getElementById('result-title').className = 'result-title found';
   document.getElementById('result-title').textContent = '✓ Ubicación asignada';
@@ -537,11 +534,9 @@ function showResultAssigned(ean, location) {
     <div class="ubicacion-item">
       <div class="ubicacion-icon">📍</div>
       <div><div class="ubicacion-name">${location}</div></div>
-    </div>
-  `;
+    </div>`;
   document.getElementById('result-actions').innerHTML = `
-    <button class="result-btn result-btn-ok" onclick="clearResultAndResume()">✓ Siguiente producto</button>
-  `;
+    <button class="result-btn result-btn-ok" onclick="clearResultAndResume()">✓ Siguiente producto</button>`;
 }
 
 function startAssignQR() {
@@ -550,12 +545,8 @@ function startAssignQR() {
   card.className = 'result-card scanning-qr';
   document.getElementById('result-title').className = 'result-title scanning-qr';
   document.getElementById('result-title').textContent = '📷 Escanea el QR de la ubicación';
-  document.getElementById('ubicacion-list').innerHTML = `
-    <div style="font-size:13px;color:#60a5fa;padding:4px 0">Apunta la cámara al QR de la estantería donde vas a dejar el producto.</div>
-  `;
-  document.getElementById('result-actions').innerHTML = `
-    <button class="result-btn result-btn-cancel" onclick="cancelAssign()">Cancelar</button>
-  `;
+  document.getElementById('ubicacion-list').innerHTML = `<div style="font-size:13px;color:#60a5fa;padding:4px 0">Apunta la cámara al QR de la estantería donde vas a dejar el producto.</div>`;
+  document.getElementById('result-actions').innerHTML = `<button class="result-btn result-btn-cancel" onclick="cancelAssign()">Cancelar</button>`;
   document.getElementById('scan-hint').textContent = 'Escanea el QR de la ubicación';
   setStatus('📷 Esperando QR de ubicación...', 'loading');
   pendingCode = null;
@@ -572,32 +563,22 @@ async function assignLocation(locationQR) {
     date, note: 'Asignado en reposición', synced: true,
   };
   records.unshift(rec); save(); updateStats(); renderTable();
-  repStep = 'scan-ean';
-  pendingCode = null;
+  repStep = 'scan-ean'; pendingCode = null;
   showResultAssigned(repCurrentEAN, locationQR);
   document.getElementById('scan-hint').textContent = 'Escanea el EAN-13 del producto';
   if (quaggaRunning) { Quagga.start(); const v = document.querySelector('#quagga-container video'); if(v) startQRLoop(v); }
   setStatus('✓ Siguiente producto', 'ok');
 }
 
-function cancelAssign() {
-  repStep = 'scan-ean';
-  repCurrentEAN = null;
-  clearResultAndResume();
-}
+function cancelAssign() { repStep = 'scan-ean'; repCurrentEAN = null; clearResultAndResume(); }
 
 function clearResultAndResume() {
-  hideResultCard();
-  repStep = 'scan-ean';
+  hideResultCard(); repStep = 'scan-ean';
   document.getElementById('scan-hint').textContent = 'Escanea el EAN-13 del producto';
   resumeScan();
 }
 
-function hideResultCard() {
-  document.getElementById('result-card').style.display = 'none';
-  document.getElementById('result-card').className = 'result-card';
-}
-
+function hideResultCard() { document.getElementById('result-card').style.display = 'none'; document.getElementById('result-card').className = 'result-card'; }
 function hideModal() { document.getElementById('modal').classList.remove('show'); }
 
 function setStatus(msg, type) {
@@ -610,18 +591,16 @@ function updateLocationBanner() {
   const name = document.getElementById('inv-location-name');
   const count = document.getElementById('inv-location-count');
   if (currentLocation) {
-    banner.classList.add('active');
-    name.className = 'location-name'; name.textContent = currentLocation;
+    banner.classList.add('active'); name.className = 'location-name'; name.textContent = currentLocation;
     const n = records.filter(r => r.location === currentLocation).length;
     count.textContent = n + ' producto' + (n !== 1 ? 's' : '') + ' en esta ubicación';
   } else {
-    banner.classList.remove('active');
-    name.className = 'location-name empty';
-    name.textContent = 'Escanea un QR para establecer ubicación';
-    count.textContent = '';
+    banner.classList.remove('active'); name.className = 'location-name empty';
+    name.textContent = 'Escanea un QR para establecer ubicación'; count.textContent = '';
   }
 }
 
+// ---- Records ----
 function addRecord(code, type) {
   const rec = {
     id: records.length ? Math.max(...records.map(r=>r.id))+1 : 1,
@@ -643,11 +622,7 @@ function addManual() {
 }
 
 function deleteRec(id) { records = records.filter(r=>r.id!==id); save(); updateStats(); renderTable(); updateLocationBanner(); }
-function clearAll() {
-  if (!records.length) return;
-  if (!confirm('¿Eliminar todos los registros locales?')) return;
-  records=[]; save(); updateStats(); renderTable(); updateLocationBanner();
-}
+function clearAll() { if (!records.length) return; if (!confirm('¿Eliminar todos los registros locales?')) return; records=[]; save(); updateStats(); renderTable(); updateLocationBanner(); }
 function save() { localStorage.setItem('almacen_v5', JSON.stringify(records)); }
 
 function updateStats() {
